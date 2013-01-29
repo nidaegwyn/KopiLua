@@ -1,4 +1,7 @@
-README for KopiLua 1.1
+KopiLua
+=================
+
+[![Build Status](https://travis-ci.org/codefoco/KopiLua.png?branch=master)](https://travis-ci.org/codefoco/KopiLua)
 
 * What is KopiLua?
  ------------
@@ -26,4 +29,3 @@ README for KopiLua 1.1
  Please report all bugs and issues to Elijah Frederickson/mlnlover11 (mailto:elijah.frederickson@gmail.com)
  (Old: Please report all bugs and issues to Mark Feldman (mailto:lua@ppl-pilot.com))
 
-(end of README)
