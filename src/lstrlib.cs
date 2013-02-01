@@ -424,10 +424,11 @@ namespace KopiLua
                                         if (s == null) return null;
                                         p+=2; goto init;  /* else return match(ms, s, p+2) */
                                     }
-                                    goto dflt;  /* case default */
+									break;
                                 }
                         }
-                    }
+						goto dflt;  /* case default */
+					}
                     case '\0': {  /* end of pattern */
                         return s;  /* match succeeded */
                     }
@@ -436,7 +437,8 @@ namespace KopiLua
                         return (s == ms.src_end) ? s : null;  /* check end of string */
                         else goto dflt;
                     }
-                    default: dflt: {  /* it is a pattern item */
+					}
+					dflt: {  /* it is a pattern item */
                         CharPtr ep = classend(ms, p);  /* points to what is next */
                         int m = (s<ms.src_end) && (singlematch((byte)(s[0]), p, ep)!=0) ? 1 : 0;
                         switch (ep[0]) {
@@ -461,7 +463,7 @@ namespace KopiLua
                                 }
                         }
                     }
-            }
+            
         }
 
 

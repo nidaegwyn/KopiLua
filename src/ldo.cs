@@ -530,7 +530,7 @@ namespace KopiLua
             lu_byte old_allowhooks = L.allowhook;
             ptrdiff_t old_errfunc = L.errfunc;
             L.errfunc = ef;
-            status = luaD_rawrunprotected(L, func, u);
+             status = luaD_rawrunprotected(L, func, u);
             if (status != 0) {  /* an error occurred? */
                 StkId oldtop = restorestack(L, old_top);
                 luaF_close(L, oldtop);  /* close eventual pending closures */
