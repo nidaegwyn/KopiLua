@@ -40,8 +40,7 @@ namespace Tests.iOS
 		Lua.lua_State state;
 		string GetTestPath(string name)
 		{
-			string path = Directory.GetCurrentDirectory ();
-			string filePath = Path.Combine ("LuaTests", "core", name + ".lua");
+			string filePath = Path.Combine (Path.Combine ("LuaTests", "core"), name + ".lua");
 			return filePath;
 		}
 
