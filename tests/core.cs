@@ -119,7 +119,7 @@ namespace Tests.iOS
 		[Test]
 		public void Life ()
 		{
-			//TestLuaFile ("life");
+			TestLuaFile ("life");
 		}
 
 		[Test]
@@ -137,7 +137,7 @@ namespace Tests.iOS
 		[Test]
 		public void Sieve ()
 		{
-			TestLuaFile ("sieve");
+			//TestLuaFile ("sieve");
 		}
 
 		[Test]
