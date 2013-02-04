@@ -87,8 +87,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-    <Folder Include="LuaTests\" />
     <Folder Include="Resources\Icons\" />
+    <Folder Include="LuaTests\" />
+    <Folder Include="LuaTests\core\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -102,42 +103,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <BundleResource Include="..\..\..\LuaTests\core\bisect.lua">
-      <Link>LuaTests\core\bisect.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\cf.lua">
-      <Link>LuaTests\core\cf.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\env.lua">
-      <Link>LuaTests\core\env.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\factorial.lua">
-      <Link>LuaTests\core\factorial.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\fib.lua">
-      <Link>LuaTests\core\fib.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\fibfor.lua">
-      <Link>LuaTests\core\fibfor.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\life.lua">
-      <Link>LuaTests\core\life.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\printf.lua">
-      <Link>LuaTests\core\printf.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\readonly.lua">
-      <Link>LuaTests\core\readonly.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\sieve.lua">
-      <Link>LuaTests\core\sieve.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\sort.lua">
-      <Link>LuaTests\core\sort.lua</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\..\LuaTests\core\trace-globals.lua">
-      <Link>LuaTests\core\trace-globals.lua</Link>
-    </BundleResource>
     <BundleResource Include="Resources\Icons\Icon-72.png" />
     <BundleResource Include="Resources\Icons\Icon-72%402x.png" />
     <BundleResource Include="Resources\Icons\Icon-Small-50.png" />
@@ -148,6 +113,42 @@
     <BundleResource Include="Resources\Icons\Icon%402x.png" />
     <BundleResource Include="Resources\Icons\iTunesArtwork%402x.png" />
     <BundleResource Include="Resources\Icon.png" />
+    <BundleResource Include="..\LuaTests\core\bisect.lua">
+      <Link>LuaTests\core\bisect.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\cf.lua">
+      <Link>LuaTests\core\cf.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\env.lua">
+      <Link>LuaTests\core\env.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\factorial.lua">
+      <Link>LuaTests\core\factorial.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\fib.lua">
+      <Link>LuaTests\core\fib.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\fibfor.lua">
+      <Link>LuaTests\core\fibfor.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\life.lua">
+      <Link>LuaTests\core\life.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\printf.lua">
+      <Link>LuaTests\core\printf.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\readonly.lua">
+      <Link>LuaTests\core\readonly.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\sieve.lua">
+      <Link>LuaTests\core\sieve.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\sort.lua">
+      <Link>LuaTests\core\sort.lua</Link>
+    </BundleResource>
+    <BundleResource Include="..\LuaTests\core\trace-globals.lua">
+      <Link>LuaTests\core\trace-globals.lua</Link>
+    </BundleResource>
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="Resources\Icons\iTunesArtwork.png" />
