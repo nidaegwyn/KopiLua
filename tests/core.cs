@@ -94,7 +94,7 @@ namespace Tests.iOS
 		[Test]
 		public void Env ()
 		{
-			//TestLuaFile ("env");
+			TestLuaFile ("env");
 		}
 
 		[Test]
@@ -130,7 +130,7 @@ namespace Tests.iOS
 		[Test]
 		public void Sieve ()
 		{
-			//TestLuaFile ("sieve");
+			TestLuaFile ("sieve");
 		}
 
 		[Test]
