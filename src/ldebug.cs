@@ -183,7 +183,6 @@ namespace KopiLua
 		  incr_top(L);
 		}
 
-
 		private static int auxgetinfo (lua_State L, CharPtr what, lua_Debug ar,
 							Closure f, CallInfo ci) {
 		  int status = 1;
@@ -279,6 +278,7 @@ namespace KopiLua
 
 		public static int checkopenop(Proto pt, int pc) { return luaG_checkopenop(pt.code[pc + 1]); }
 
+		[CLSCompliantAttribute(false)]
 		public static int luaG_checkopenop (Instruction i) {
 		  switch (GET_OPCODE(i)) {
 			case OpCode.OP_CALL:

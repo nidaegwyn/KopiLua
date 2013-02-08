@@ -471,7 +471,7 @@ namespace AT.MIN
 					#endregion
 					#region s - string
 					case 's':   // string
-						string t = "{0" + ( fieldLength != int.MinValue ? "," + ( flagLeft2Right ? "-" : String.Empty ) + fieldLength.ToString() : String.Empty ) + ":s}";
+						//string t = "{0" + ( fieldLength != int.MinValue ? "," + ( flagLeft2Right ? "-" : String.Empty ) + fieldLength.ToString() : String.Empty ) + ":s}";
 						w = o.ToString();
 						if ( fieldPrecision >= 0 )
 							w = w.Substring( 0, fieldPrecision );
@@ -679,7 +679,9 @@ namespace AT.MIN
 						w = w.PadLeft( FieldLength - 1, Padding );
 					if ( IsPositive( Value, true ) )
 						w = ( PositiveSign ?
-								"+" : ( PositiveSpace ? " " : String.Empty ) ) + w;
+								"+" : ( PositiveSpace ?
+										" " : ( FieldLength != int.MinValue ?
+												Padding.ToString() : String.Empty ) ) ) + w;
 					else
 						w = "-" + w;
 				}

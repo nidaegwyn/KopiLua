@@ -99,8 +99,8 @@ namespace KopiLua
 			  mt = G(L).mt[ttype(o)];
 			  break;
 		  }
+
 		  return ((mt!=null) ? luaH_getstr(mt, G(L).tmname[(int)event_]) : luaO_nilobject);
 		}
-
 	}
 }
