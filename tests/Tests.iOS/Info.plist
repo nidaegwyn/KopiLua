@@ -24,7 +24,7 @@
 		<string>Icons/Icon-Small-50@2x.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>
-	<string>com.codefoco.luatest</string>
+	<string>com.codefoco.kopiluatest</string>
 	<key>MinimumOSVersion</key>
 	<string>3.2</string>
 	<key>UIDeviceFamily</key>
