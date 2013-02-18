@@ -75,5 +75,6 @@
     <Compile Include="src\print.cs" />
     <Compile Include="src\ios\AssemblyInfo.cs" />
     <Compile Include="src\printf\Tools.cs" />
+    <Compile Include="src\lnet.cs" />
   </ItemGroup>
 </Project>
