@@ -98,6 +98,7 @@
     <Compile Include="src\lzio.cs" />
     <Compile Include="src\print.cs" />
     <Compile Include="src\printf\Tools.cs" />
+    <Compile Include="src\lnet.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
