@@ -86,10 +86,9 @@
     <Reference Include="MonoTouch.NUnitLite" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\" />
-    <Folder Include="Resources\Icons\" />
     <Folder Include="LuaTests\" />
     <Folder Include="LuaTests\core\" />
+    <Folder Include="Icons\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -103,16 +102,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <BundleResource Include="Resources\Icons\Icon-72.png" />
-    <BundleResource Include="Resources\Icons\Icon-72%402x.png" />
-    <BundleResource Include="Resources\Icons\Icon-Small-50.png" />
-    <BundleResource Include="Resources\Icons\Icon-Small-50%402x.png" />
-    <BundleResource Include="Resources\Icons\Icon-Small.png" />
-    <BundleResource Include="Resources\Icons\Icon-Small%402x.png" />
-    <BundleResource Include="Resources\Icons\Icon.png" />
-    <BundleResource Include="Resources\Icons\Icon%402x.png" />
-    <BundleResource Include="Resources\Icons\iTunesArtwork%402x.png" />
-    <BundleResource Include="Resources\Icon.png" />
     <BundleResource Include="..\LuaTests\core\bisect.lua">
       <Link>LuaTests\core\bisect.lua</Link>
     </BundleResource>
@@ -151,12 +140,24 @@
     </BundleResource>
   </ItemGroup>
   <ItemGroup>
-    <ITunesArtwork Include="Resources\Icons\iTunesArtwork.png" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\KopiLua.iOS.csproj">
       <Project>{44DA9778-C0B0-4C6F-8617-79BA2E0F1361}</Project>
       <Name>KopiLua.iOS</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icons\Icon-72.png" />
+    <Content Include="Icons\Icon-72%402x.png" />
+    <Content Include="Icons\Icon-Small-50.png" />
+    <Content Include="Icons\Icon-Small-50%402x.png" />
+    <Content Include="Icons\Icon-Small.png" />
+    <Content Include="Icons\Icon-Small%402x.png" />
+    <Content Include="Icons\Icon.png" />
+    <Content Include="Icons\Icon%402x.png" />
+    <Content Include="Icons\iTunesArtwork%402x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ITunesArtwork Include="Icons\iTunesArtwork.png" />
+    <ITunesArtwork Include="iTunesArtwork%402x" />
   </ItemGroup>
 </Project>
