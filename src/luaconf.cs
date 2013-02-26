@@ -1155,10 +1155,19 @@ namespace KopiLua
 			}
 			public override string ToString()
 			{
-				string result = "";
+				System.Text.StringBuilder result = new System.Text.StringBuilder ();
 				for (int i = index; (i<chars.Length) && (chars[i] != '\0'); i++)
-					result += chars[i];
-				return result;
+					result.Append (chars [i]);
+
+				return result.ToString();
+			}
+
+			public string ToString (uint length)
+			{
+				System.Text.StringBuilder result = new System.Text.StringBuilder ();
+				for (int i = index; (i < chars.Length) && i < length; i++)
+					result.Append (chars [i]);
+				return result.ToString();
 			}
 		}
 
