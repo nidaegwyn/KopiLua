@@ -39,6 +39,11 @@ namespace KopiLua
 #if XBOX || SILVERLIGHT
 			luaL_error(L, "os_execute not supported on XBox360");
 #else
+			CharPtr param = luaL_optstring(L, 1, null);
+			if (param == null) {
+				lua_pushinteger (L, 1);
+				return 1;
+			}
 			CharPtr strCmdLine = "/C regenresx " + luaL_optstring(L, 1, null);
 			System.Diagnostics.Process proc = new System.Diagnostics.Process();
 			proc.EnableRaisingEvents=false;
