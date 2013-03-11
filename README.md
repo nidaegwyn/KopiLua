@@ -1,13 +1,13 @@
 KopiLua
 =================
 
-[![Build Status](https://travis-ci.org/codefoco/KopiLua.png?branch=master)](https://travis-ci.org/codefoco/KopiLua)
+[![Build Status](https://travis-ci.org/NLua/KopiLua.png?branch=master)](https://travis-ci.org/NLua/KopiLua)
 
 * What is KopiLua?
  ------------
  Kopi Lua was originally a C# port of the Lua v.5.1.4 virtual machine, parser, libraries and 
  command-line utilities.
- It has been updated to Lua 5.1.5 on 9/27/12 by Elijah Frederickson.
+ It has been updated to Lua 5.1.5 on Feb/08/2012 by Vinicius Jarina.
    
 * Availability
  ------------
@@ -26,6 +26,6 @@ KopiLua
   
  * Contact/Bug Reports etc
  -------------------------
- Please report all bugs and issues to Elijah Frederickson/mlnlover11 (mailto:elijah.frederickson@gmail.com)
+ Please report all bugs and issues to Vinicius Jarina/viniciusjarina (mailto:viniciusjarina@gmail.com)
  (Old: Please report all bugs and issues to Mark Feldman (mailto:lua@ppl-pilot.com))
 
