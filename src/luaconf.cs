@@ -1162,7 +1162,7 @@ namespace KopiLua
 				return result.ToString();
 			}
 
-			public string ToString (uint length)
+			public string ToString (int length)
 			{
 				System.Text.StringBuilder result = new System.Text.StringBuilder ();
 				for (int i = index; (i < chars.Length) && i < length; i++)
