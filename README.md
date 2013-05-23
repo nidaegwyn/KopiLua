@@ -9,6 +9,14 @@ KopiLua
  command-line utilities.
  It has been updated to Lua 5.1.5 on Feb/08/2012 by Vinicius Jarina.
    
+* Contributing
+ --------------
+ * KopiLua is using the Mono Code-Style http://www.mono-project.com/Coding_Guidelines .
+ * Please, do not change the line-end or re-indent the code.
+ * Run the tests before push.
+ * Avoid to push unneeded style changes (unless is really needed) renaming, move code.
+ 
+
 * Availability
  ------------
  Like Lua, KopiLua is freely available for both academic and commercial
