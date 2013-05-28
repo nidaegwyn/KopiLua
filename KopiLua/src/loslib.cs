@@ -193,6 +193,11 @@ namespace KopiLua
 		}
 
 		#region strftime c# implementation
+		
+		// This strftime implementation has been made following the
+		// Sanos OS open-source strftime.c implementation at
+		// http://www.jbox.dk/sanos/source/lib/strftime.c.html
+		
 		private static uint strftime(CharPtr s, uint maxsize, CharPtr format, DateTime t)
 		{
 			int sIndex = s.index;
