@@ -422,8 +422,8 @@ namespace KopiLua
 							continue;
 
 						case 'z': // ISO 8601 offset from UTC in timezone (+/-hhmm), or nothing if unavailable
-							string offset = TimeZoneInfo.Local.GetUtcOffset(t).ToString("hhmm");
-							if (!offset.StartsWith("-")) offset = "+" + offset;
+							TimeSpan ts = TimeZoneInfo.Local.GetUtcOffset(t);
+							string offset = (ts.Ticks < 0 ? "-" : "+") + ts.TotalHours.ToString("#00") + ts.Minutes.ToString("00");
 							pt = strftime_add(offset, pt, ptlim);
 							continue;
 
