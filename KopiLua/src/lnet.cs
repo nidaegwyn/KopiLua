@@ -119,6 +119,26 @@ namespace KopiLua
 			return fourBytesToInt (bytes);
 		}
 
+		public static void luanet_pushglobaltable (lua_State L) 
+		{
+			lua_pushvalue (L, LUA_GLOBALSINDEX);
+		}
+
+		public static void luanet_popglobaltable (lua_State L)
+		{
+			lua_replace (L, LUA_GLOBALSINDEX);
+		}
+
+		public static void luanet_setglobal (lua_State L, string name)
+		{
+			lua_setglobal (L, name);
+		}
+
+		public static void luanet_getglobal (lua_State L, string name)
+		{
+			lua_getglobal (L, name);
+		}
+
 		private static int fourBytesToInt (byte[] bytes)
 		{
 			return bytes [0] + (bytes [1] << 8) + (bytes [2] << 16) + (bytes [3] << 24);
