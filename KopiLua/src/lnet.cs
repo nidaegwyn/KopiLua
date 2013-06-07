@@ -139,6 +139,11 @@ namespace KopiLua
 			lua_getglobal (L, name);
 		}
 
+		public static int luanet_registryindex () 
+		{
+			return LUA_REGISTRYINDEX;
+		}
+
 		private static int fourBytesToInt (byte[] bytes)
 		{
 			return bytes [0] + (bytes [1] << 8) + (bytes [2] << 16) + (bytes [3] << 24);
