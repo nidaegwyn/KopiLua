@@ -437,9 +437,9 @@ namespace KopiLua
 		  api_incr_top(L);
 		  lua_unlock(L);
 		}
+		
 
-		[CLSCompliantAttribute(false)]
-		public static void lua_pushlstring (lua_State L, CharPtr s, uint len) {
+		private static void lua_pushlstring (lua_State L, CharPtr s, uint len) {
 		  lua_lock(L);
 		  luaC_checkGC(L);
 		  setsvalue2s(L, L.top, luaS_newlstr(L, s, len));

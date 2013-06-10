@@ -192,6 +192,12 @@ namespace KopiLua
 		{
 			return lua_equal (L, idx1, idx2);
 		}
+
+		[CLSCompliantAttribute (false)]
+		public static void luanet_pushlstring (lua_State L, string s, uint len)
+		{
+			lua_pushlstring (L, s, len);
+		}
 	}
 }
 
