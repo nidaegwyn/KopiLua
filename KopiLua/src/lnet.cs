@@ -119,6 +119,28 @@ namespace KopiLua
 			return fourBytesToInt (bytes);
 		}
 
+		private static int fourBytesToInt (byte [] bytes)
+		{
+			return bytes [0] + (bytes [1] << 8) + (bytes [2] << 16) + (bytes [3] << 24);
+		}
+
+		private static void intToFourBytes (int val, byte [] bytes)
+		{
+			// gfoot: is this really a good idea?
+			bytes [0] = (byte)val;
+			bytes [1] = (byte)(val >> 8);
+			bytes [2] = (byte)(val >> 16);
+			bytes [3] = (byte)(val >> 24);
+		}
+
+		/* Compatibility functions to allow NLua work with Lua 5.1.5 and Lua 5.2.2 with the same dll interface.
+		 * KopiLua methods to match KeraLua API */ 
+
+		public static int luanet_registryindex ()
+		{
+			return LUA_REGISTRYINDEX;
+		}
+
 		public static void luanet_pushglobaltable (lua_State L) 
 		{
 			lua_pushvalue (L, LUA_GLOBALSINDEX);
@@ -138,26 +160,38 @@ namespace KopiLua
 		{
 			lua_getglobal (L, name);
 		}
-
-		public static int luanet_registryindex () 
-		{
-			return LUA_REGISTRYINDEX;
-		}
-
-		private static int fourBytesToInt (byte[] bytes)
-		{
-			return bytes [0] + (bytes [1] << 8) + (bytes [2] << 16) + (bytes [3] << 24);
-		}
 		
-		private static void intToFourBytes (int val, byte[] bytes)
+		public static int luanet_pcall (lua_State L, int nargs, int nresults, int errfunc)
 		{
-			// gfoot: is this really a good idea?
-			bytes [0] = (byte)val;
-			bytes [1] = (byte)(val >> 8);
-			bytes [2] = (byte)(val >> 16);
-			bytes [3] = (byte)(val >> 24);
+			return lua_pcall (L, nargs, nresults, errfunc);
 		}
 
+		[CLSCompliantAttribute (false)]
+		public static int luanet_loadbuffer (lua_State L, string buff, uint sz, string name)
+		{
+			return luaL_loadbuffer (L, buff, sz, name);
+		}
+
+		[CLSCompliantAttribute (false)]
+		public static int luanet_loadbuffer (lua_State L, byte [] buff, uint sz, string name)
+		{
+			return luaL_loadbuffer (L, buff, sz, name);
+		}
+
+		public static int luanet_loadfile (lua_State L, string file)
+		{
+			return luaL_loadfile (L, file);
+		}
+
+		public static double luanet_tonumber (lua_State L, int idx)
+		{
+			return lua_tonumber (L, idx);
+		}
+
+		public static int luanet_equal (lua_State L, int idx1, int idx2)
+		{
+			return lua_equal (L, idx1, idx2);
+		}
 	}
 }
 
