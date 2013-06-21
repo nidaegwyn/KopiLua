@@ -36,12 +36,12 @@ namespace KopiLua
 		//typedef unsigned char lu_byte;
 
 		[CLSCompliantAttribute(false)]
-		public const uint MAX_SIZET	= uint.MaxValue - 2;
+		public const uint MAXSIZET	= uint.MaxValue - 2;
 		[CLSCompliantAttribute(false)]
-		public const lu_mem MAX_LUMEM	= lu_mem.MaxValue - 2;
+		public const lu_mem MAXLUMEM	= lu_mem.MaxValue - 2;
 
 
-		public const int MAX_INT = (Int32.MaxValue - 2);  /* maximum value of an int (-2 for safety) */
+		public const int MAXINT = (Int32.MaxValue - 2);  /* maximum value of an int (-2 for safety) */
 
 		/*
 		** conversion of pointer to integer
@@ -65,54 +65,54 @@ namespace KopiLua
 #if lua_assert
 
 		[Conditional("DEBUG")]
-		internal static void lua_assert(bool c) {Debug.Assert(c);}
+		internal static void LuaAssert(bool c) {Debug.Assert(c);}
 
 		[Conditional("DEBUG")]
-		internal static void lua_assert(int c) { Debug.Assert(c != 0); }
+		internal static void LuaAssert(int c) { Debug.Assert(c != 0); }
 
-		internal static object check_exp(bool c, object e)		{lua_assert(c); return e;}
-		internal static object check_exp(int c, object e) { lua_assert(c != 0); return e; }
+		internal static object CheckExp(bool c, object e)		{LuaAssert(c); return e;}
+		internal static object CheckExp(int c, object e) { LuaAssert(c != 0); return e; }
 
 #else
 
 		[Conditional("DEBUG")]
-		internal static void lua_assert(bool c) { }
+		internal static void LuaAssert(bool c) { }
 
 		[Conditional("DEBUG")]
-		internal static void lua_assert(int c) { }
+		internal static void LuaAssert(int c) { }
 
-		internal static object check_exp(bool c, object e) { return e; }
-		internal static object check_exp(int c, object e) { return e; }
+		internal static object CheckExp(bool c, object e) { return e; }
+		internal static object CheckExp(int c, object e) { return e; }
 
 #endif
 
 		[Conditional("DEBUG")]
-		internal static void api_check(object o, bool e) { lua_assert(e); }
-		internal static void api_check(object o, int e) { lua_assert(e != 0); }
+		internal static void ApiCheck(object o, bool e) { LuaAssert(e); }
+		internal static void ApiCheck(object o, int e) { LuaAssert(e != 0); }
 
 		//#define UNUSED(x)	((void)(x))	/* to avoid warnings */
 
 
-		internal static lu_byte cast_byte(int i) { return (lu_byte)i; }
-		internal static lu_byte cast_byte(long i) { return (lu_byte)(int)i; }
-		internal static lu_byte cast_byte(bool i) { return i ? (lu_byte)1 : (lu_byte)0; }
-		internal static lu_byte cast_byte(lua_Number i) { return (lu_byte)i; }
-		internal static lu_byte cast_byte(object i) { return (lu_byte)(int)(i); }
+		internal static lu_byte CastByte(int i) { return (lu_byte)i; }
+		internal static lu_byte CastByte(long i) { return (lu_byte)(int)i; }
+		internal static lu_byte CastByte(bool i) { return i ? (lu_byte)1 : (lu_byte)0; }
+		internal static lu_byte CastByte(lua_Number i) { return (lu_byte)i; }
+		internal static lu_byte CastByte(object i) { return (lu_byte)(int)(i); }
 
-		internal static int cast_int(int i) { return (int)i; }
-		internal static int cast_int(uint i) { return (int)i; }
-		internal static int cast_int(long i) { return (int)(int)i; }
-		internal static int cast_int(ulong i) { return (int)(int)i; }
-		internal static int cast_int(bool i) { return i ? (int)1 : (int)0; }
-		internal static int cast_int(lua_Number i) { return (int)i; }
-		internal static int cast_int(object i) { Debug.Assert(false, "Can't convert int."); return Convert.ToInt32(i); }
+		internal static int CastInt(int i) { return (int)i; }
+		internal static int CastInt(uint i) { return (int)i; }
+		internal static int CastInt(long i) { return (int)(int)i; }
+		internal static int CastInt(ulong i) { return (int)(int)i; }
+		internal static int CastInt(bool i) { return i ? (int)1 : (int)0; }
+		internal static int CastInt(lua_Number i) { return (int)i; }
+		internal static int CastInt(object i) { Debug.Assert(false, "Can't convert int."); return Convert.ToInt32(i); }
 
-		internal static lua_Number cast_num(int i) { return (lua_Number)i; }
-		internal static lua_Number cast_num(uint i) { return (lua_Number)i; }
-		internal static lua_Number cast_num(long i) { return (lua_Number)i; }
-		internal static lua_Number cast_num(ulong i) { return (lua_Number)i; }
-		internal static lua_Number cast_num(bool i) { return i ? (lua_Number)1 : (lua_Number)0; }
-		internal static lua_Number cast_num(object i) { Debug.Assert(false, "Can't convert number."); return Convert.ToSingle(i); }
+		internal static lua_Number CastNum(int i) { return (lua_Number)i; }
+		internal static lua_Number CastNum(uint i) { return (lua_Number)i; }
+		internal static lua_Number CastNum(long i) { return (lua_Number)i; }
+		internal static lua_Number CastNum(ulong i) { return (lua_Number)i; }
+		internal static lua_Number CastNum(bool i) { return i ? (lua_Number)1 : (lua_Number)0; }
+		internal static lua_Number CastNum(object i) { Debug.Assert(false, "Can't convert number."); return Convert.ToSingle(i); }
 
 		/*
 		** type for virtual-machine instructions
@@ -132,17 +132,17 @@ namespace KopiLua
 
 
 		/* minimum size for string buffer */
-		public const int LUA_MINBUFFER	= 32;
+		public const int LUAMINBUFFER	= 32;
 
 
 		#if !lua_lock
-		public static void lua_lock(lua_State L) { }
-		public static void lua_unlock(lua_State L) { }
+		public static void LuaLock(LuaState L) { }
+		public static void LuaUnlock(LuaState L) { }
 		#endif
 		
 
 		#if !luai_threadyield
-		public static void luai_threadyield(lua_State L)     {lua_unlock(L); lua_lock(L);}
+		public static void LuaIThreadYield(LuaState L)     {LuaUnlock(L); LuaLock(L);}
 		#endif
 
 

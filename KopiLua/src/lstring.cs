@@ -20,17 +20,17 @@ namespace KopiLua
 
 		public static int sizeudata(Udata u) { return (int)u.len; }
 
-		public static TString luaS_new(lua_State L, CharPtr s) { return luaS_newlstr(L, s, (uint)strlen(s)); }
-		public static TString luaS_newliteral(lua_State L, CharPtr s) { return luaS_newlstr(L, s, (uint)strlen(s)); }
+		public static TString luaS_new(LuaState L, CharPtr s) { return luaS_newlstr(L, s, (uint)strlen(s)); }
+		public static TString luaS_newliteral(LuaState L, CharPtr s) { return luaS_newlstr(L, s, (uint)strlen(s)); }
 
 		public static void luaS_fix(TString s)
 		{
 			lu_byte marked = s.tsv.marked;	// can't pass properties in as ref
-			l_setbit(ref marked, FIXEDBIT);
+			LSetBit(ref marked, FIXEDBIT);
 			s.tsv.marked = marked;
 		}
 
-		public static void luaS_resize (lua_State L, int newsize) {
+		public static void luaS_resize (LuaState L, int newsize) {
 		  GCObject[] newhash;
 		  stringtable tb;
 		  int i;
@@ -48,7 +48,7 @@ namespace KopiLua
 			  GCObject next = p.gch.next;  /* save next */
 			  uint h = gco2ts(p).hash;
 			  int h1 = (int)lmod(h, newsize);  /* new position */
-			  lua_assert((int)(h%newsize) == lmod(h, newsize));
+			  LuaAssert((int)(h%newsize) == lmod(h, newsize));
 			  p.gch.next = newhash[h1];  /* chain it */
 			  newhash[h1] = p;
 			  p = next;
@@ -62,17 +62,17 @@ namespace KopiLua
 		}
 
 		[CLSCompliantAttribute(false)]
-		public static TString newlstr (lua_State L, CharPtr str, uint l,
+		public static TString newlstr (LuaState L, CharPtr str, uint l,
 											   uint h) {
 		  TString ts;
 		  stringtable tb;
-		  if (l+1 > MAX_SIZET /GetUnmanagedSize(typeof(char)))
-		    luaM_toobig(L);
+		  if (l+1 > MAXSIZET /GetUnmanagedSize(typeof(char)))
+		    LuaMTooBig(L);
 		  ts = new TString(new char[l+1]);
 		  AddTotalBytes(L, (int)(l + 1) * GetUnmanagedSize(typeof(char)) + GetUnmanagedSize(typeof(TString)));
 		  ts.tsv.len = l;
 		  ts.tsv.hash = h;
-		  ts.tsv.marked = luaC_white(G(L));
+		  ts.tsv.marked = LuaCWhite(G(L));
 		  ts.tsv.tt = LUA_TSTRING;
 		  ts.tsv.reserved = 0;
 		  //memcpy(ts+1, str, l*GetUnmanagedSize(typeof(char)));
@@ -83,13 +83,13 @@ namespace KopiLua
 		  ts.tsv.next = tb.hash[h];  /* chain new entry */
 		  tb.hash[h] = obj2gco(ts);
 		  tb.nuse++;
-		  if ((tb.nuse > (int)tb.size) && (tb.size <= MAX_INT/2))
+		  if ((tb.nuse > (int)tb.size) && (tb.size <= MAXINT/2))
 		    luaS_resize(L, tb.size*2);  /* too crowded */
 		  return ts;
 		}
 
 		[CLSCompliantAttribute(false)]
-		public static TString luaS_newlstr (lua_State L, CharPtr str, uint l) {
+		public static TString luaS_newlstr (LuaState L, CharPtr str, uint l) {
 		  GCObject o;
 		  uint h = (uint)l;  /* seed */
 		  uint step = (l>>5)+1;  /* if string is too long, don't hash all its chars */
@@ -100,9 +100,9 @@ namespace KopiLua
 			   o != null;
 			   o = o.gch.next) {
 			TString ts = rawgco2ts(o);			
-			if (ts.tsv.len == l && (memcmp(str, getstr(ts), l) == 0)) {
+			if (ts.tsv.len == l && (memcmp(str, GetStr(ts), l) == 0)) {
 			  /* string may be dead */
-			  if (isdead(G(L), o)) changewhite(o);
+			  if (IsDead(G(L), o)) ChangeWhite(o);
 			  return ts;
 			}
 		  }
@@ -112,10 +112,10 @@ namespace KopiLua
 		}
 
 		[CLSCompliantAttribute(false)]
-		public static Udata luaS_newudata(lua_State L, uint s, Table e)
+		public static Udata luaS_newudata(LuaState L, uint s, Table e)
 		{
 			Udata u = new Udata();
-			u.uv.marked = luaC_white(G(L));  /* is not finalized */
+			u.uv.marked = LuaCWhite(G(L));  /* is not finalized */
 			u.uv.tt = LUA_TUSERDATA;
 			u.uv.len = s;
 			u.uv.metatable = null;
@@ -128,15 +128,15 @@ namespace KopiLua
 			return u;
 		}
 
-		internal static Udata luaS_newudata(lua_State L, Type t, Table e)
+		internal static Udata luaS_newudata(LuaState L, Type t, Table e)
 		{
 			Udata u = new Udata();
-			u.uv.marked = luaC_white(G(L));  /* is not finalized */
+			u.uv.marked = LuaCWhite(G(L));  /* is not finalized */
 			u.uv.tt = LUA_TUSERDATA;
 			u.uv.len = 0; /* gfoot: not sizeof(t)? */
 			u.uv.metatable = null;
 			u.uv.env = e;
-			u.user_data = luaM_realloc_(L, t);
+			u.user_data = LuaMRealloc(L, t);
 			AddTotalBytes(L, GetUnmanagedSize(typeof(Udata)));
 			/* chain it on udata list (after main thread) */
 			u.uv.next = G(L).mainthread.next;

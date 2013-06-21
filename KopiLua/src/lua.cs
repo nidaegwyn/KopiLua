@@ -12,8 +12,8 @@ using System.Runtime.InteropServices;
 
 namespace KopiLua
 {
-	using lua_Number = Double;
-	using lua_Integer = System.Int32;
+	using LuaNumberType = Double;
+	using LuaIntegerType = System.Int32;
 
 	[CLSCompliantAttribute(true)]
 	public partial class Lua
@@ -64,7 +64,7 @@ namespace KopiLua
 		public const int LUA_REGISTRYINDEX	= (-10000);
 		public const int LUA_ENVIRONINDEX	= (-10001);
 		public const int LUA_GLOBALSINDEX	= (-10002);
-		public static int lua_upvalueindex(int i)	{return LUA_GLOBALSINDEX-i;}
+		public static int LuaUpValueIndex(int i)	{return LUA_GLOBALSINDEX-i;}
 
 
 		/* thread status; 0 is OK */
@@ -75,16 +75,16 @@ namespace KopiLua
 		public const int LUA_ERRERR	= 5;
 
 
-		public delegate int lua_CFunction(lua_State L);
+		public delegate int LuaNativeFunction(LuaState L);
 
 
 		/*
 		** functions that read/write blocks when loading/dumping Lua chunks
 		*/
 		[CLSCompliantAttribute(false)]
-        public delegate CharPtr lua_Reader(lua_State L, object ud, out uint sz);
+        public delegate CharPtr lua_Reader(LuaState L, object ud, out uint sz);
 		[CLSCompliantAttribute(false)]
-		public delegate int lua_Writer(lua_State L, CharPtr p, uint sz, object ud);
+		public delegate int lua_Writer(LuaState L, CharPtr p, uint sz, object ud);
 
 
 		/*
@@ -116,11 +116,11 @@ namespace KopiLua
 
 
 		/* type of numbers in Lua */
-		//typedef LUA_NUMBER lua_Number;
+		//typedef LUA_NUMBER LuaNumberType;
 
 
 		/* type for integer functions */
-		//typedef LUA_INTEGER lua_Integer;
+		//typedef LUA_INTEGER LuaIntegerType;
 
 		/*
 		** garbage-collection function and options
@@ -141,112 +141,112 @@ namespace KopiLua
 		** ===============================================================
 		*/
 
-        public static void lua_pop(lua_State L, int n)
+        public static void LuaPop(LuaState L, int n)
         {
-            lua_settop(L, -(n) - 1);
+            LuaSetTop(L, -(n) - 1);
         }
 
-        public static void lua_newtable(lua_State L)
+        public static void LuaNewTable(LuaState L)
         {
-            lua_createtable(L, 0, 0);
+            LuaCreateTable(L, 0, 0);
         }
 
-        public static void lua_register(lua_State L, CharPtr n, lua_CFunction f)
+        public static void LuaRegister(LuaState L, CharPtr n, LuaNativeFunction f)
         {
-            lua_pushcfunction(L, f);
-            lua_setglobal(L, n);
+            LuaPushCFunction(L, f);
+            LuaSetGlobal(L, n);
         }
 
-        public static void lua_pushcfunction(lua_State L, lua_CFunction f)
+        public static void LuaPushCFunction(LuaState L, LuaNativeFunction f)
         {
-            lua_pushcclosure(L, f, 0);
+            LuaPushCClosure(L, f, 0);
         }
 
 		[CLSCompliantAttribute(false)]
-        public static uint lua_strlen(lua_State L, int i)
+        public static uint LuaStrLen(LuaState L, int i)
         {
-            return lua_objlen(L, i);
+            return LuaObjectLen(L, i);
         }
 
-        public static bool lua_isfunction(lua_State L, int n)
+        public static bool LuaIsFunction(LuaState L, int n)
         {
-            return lua_type(L, n) == LUA_TFUNCTION;
+            return LuaType(L, n) == LUA_TFUNCTION;
         }
 
-        public static bool lua_istable(lua_State L, int n)
+        public static bool LuaIsTable(LuaState L, int n)
         {
-			return lua_type(L, n) == LUA_TTABLE;
+			return LuaType(L, n) == LUA_TTABLE;
         }
 
-        public static bool lua_islightuserdata(lua_State L, int n)
+        public static bool LuaIsLightUserData(LuaState L, int n)
         {
-            return lua_type(L, n) == LUA_TLIGHTUSERDATA;
+            return LuaType(L, n) == LUA_TLIGHTUSERDATA;
         }
 
-        public static bool lua_isnil(lua_State L, int n)
+        public static bool LuaIsNil(LuaState L, int n)
         {
-            return lua_type(L, n) == LUA_TNIL;
+            return LuaType(L, n) == LUA_TNIL;
         }
 
-        public static bool lua_isboolean(lua_State L, int n)
+        public static bool LuaIsBoolean(LuaState L, int n)
         {
-            return lua_type(L, n) == LUA_TBOOLEAN;
+            return LuaType(L, n) == LUA_TBOOLEAN;
         }
 
-        public static bool lua_isthread(lua_State L, int n)
+        public static bool LuaIsThread(LuaState L, int n)
         {
-            return lua_type(L, n) == LUA_TTHREAD;
+            return LuaType(L, n) == LUA_TTHREAD;
         }
 
-        public static bool lua_isnone(lua_State L, int n)
+        public static bool LuaIsNone(LuaState L, int n)
         {
-            return lua_type(L, n) == LUA_TNONE;
+            return LuaType(L, n) == LUA_TNONE;
         }
 
-        public static bool lua_isnoneornil(lua_State L, lua_Number n)
+        public static bool LuaIsNoneOrNil(LuaState L, LuaNumberType n)
         {
-            return lua_type(L, (int)n) <= 0;
+            return LuaType(L, (int)n) <= 0;
         }
 
-        public static void lua_pushliteral(lua_State L, CharPtr s)
+        public static void LuaPushLiteral(LuaState L, CharPtr s)
         {
             //TODO: Implement use using lua_pushlstring instead of lua_pushstring
 			//lua_pushlstring(L, "" s, (sizeof(s)/GetUnmanagedSize(typeof(char)))-1)
-            lua_pushstring(L, s);
+            LuaPushString(L, s);
         }
 
-        public static void lua_setglobal(lua_State L, CharPtr s)
+        public static void LuaSetGlobal(LuaState L, CharPtr s)
         {
-            lua_setfield(L, LUA_GLOBALSINDEX, s);
+            LuaSetField(L, LUA_GLOBALSINDEX, s);
         }
 
-        public static void lua_getglobal(lua_State L, CharPtr s)
+        public static void LuaGetGlobal(LuaState L, CharPtr s)
         {
-            lua_getfield(L, LUA_GLOBALSINDEX, s);
+            LuaGetField(L, LUA_GLOBALSINDEX, s);
         }
 
-        public static CharPtr lua_tostring(lua_State L, int i)
+        public static CharPtr LuaToString(LuaState L, int i)
         {
             uint blah;
-            return lua_tolstring(L, i, out blah);
+            return LuaToLString(L, i, out blah);
         }
 
 		////#define lua_open()	luaL_newstate()
-		public static lua_State lua_open()
+		public static LuaState LuaOpen()
         {
-            return luaL_newstate();
+            return LuaLNewState();
         }
 
         ////#define lua_getregistry(L)	lua_pushvalue(L, LUA_REGISTRYINDEX)
-        public static void lua_getregistry(lua_State L)
+        public static void LuaGetRegistry(LuaState L)
         {
-            lua_pushvalue(L, LUA_REGISTRYINDEX);
+            LuaPushValue(L, LUA_REGISTRYINDEX);
         }
 
         ////#define lua_getgccount(L)	lua_gc(L, LUA_GCCOUNT, 0)
-        public static int lua_getgccount(lua_State L)
+        public static int LuaGetGCCount(LuaState L)
         {
-            return lua_gc(L, LUA_GCCOUNT, 0);
+            return LuaGC(L, LUA_GCCOUNT, 0);
         }
 
 		//#define lua_Chunkreader		lua_Reader
@@ -279,10 +279,10 @@ namespace KopiLua
         public const int LUA_MASKCOUNT = (1 << LUA_HOOKCOUNT);
 
 		/* Functions to be called by the debuger in specific events */
-		public delegate void lua_Hook(lua_State L, lua_Debug ar);
+		public delegate void LuaHook(LuaState L, LuaDebug ar);
 
 
-		public class lua_Debug {
+		public class LuaDebug {
 		  public int event_;
 		  public CharPtr name;	/* (n) */
 		  public CharPtr namewhat;	/* (n) `global', `local', `field', `method' */

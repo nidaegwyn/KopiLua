@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace KopiLua
 {
-	using TValue = Lua.lua_TValue;
+	using TValue = Lua.LuaTypeValue;
 	using Instruction = System.UInt32;
 
 	public partial class Lua
@@ -25,7 +25,7 @@ namespace KopiLua
 
 		public static void PrintString(TString ts)
 		{
-		 CharPtr s=getstr(ts);
+		 CharPtr s=GetStr(ts);
 		 uint i,n=ts.tsv.len;
 		 putchar('"');
 		 for (i=0; i<n; i++)
@@ -55,22 +55,22 @@ namespace KopiLua
 		private static void PrintConstant(Proto f, int i)
 		{
 		 /*const*/ TValue o=f.k[i];
-		 switch (ttype(o))
+		 switch (TType(o))
 		 {
 		  case LUA_TNIL:
 			printf("nil");
 			break;
 		  case LUA_TBOOLEAN:
-			printf(bvalue(o) != 0 ? "true" : "false");
+			printf(BValue(o) != 0 ? "true" : "false");
 			break;
 		  case LUA_TNUMBER:
-			printf(LUA_NUMBER_FMT,nvalue(o));
+			printf(LUA_NUMBER_FMT,NValue(o));
 			break;
 		  case LUA_TSTRING:
-			PrintString(rawtsvalue(o));
+			PrintString(RawTSValue(o));
 			break;
 		  default:				/* cannot happen */
-			printf("? type=%d",ttype(o));
+			printf("? type=%d",TType(o));
 			break;
 		 }
 		}
@@ -88,7 +88,7 @@ namespace KopiLua
 		  int c=GETARG_C(i);
 		  int bx=GETARG_Bx(i);
 		  int sbx=GETARG_sBx(i);
-		  int line=getline(f,pc);
+		  int line=GetLine(f,pc);
 		  printf("\t%d\t",pc+1);
 		  if (line>0) printf("[%d]\t",line); else printf("[-]\t");
 		  printf("%-9s\t",luaP_opnames[(int)o]);
@@ -113,11 +113,11 @@ namespace KopiLua
 			break;
 		   case OpCode.OP_GETUPVAL:
 		   case OpCode.OP_SETUPVAL:
-			printf("\t; %s", (f.sizeupvalues>0) ? getstr(f.upvalues[b]) : "-");
+			printf("\t; %s", (f.sizeupvalues>0) ? GetStr(f.upvalues[b]) : "-");
 			break;
 		   case OpCode.OP_GETGLOBAL:
 		   case OpCode.OP_SETGLOBAL:
-			printf("\t; %s",svalue(f.k[bx]));
+			printf("\t; %s",SValue(f.k[bx]));
 			break;
 		   case OpCode.OP_GETTABLE:
 		   case OpCode.OP_SELF:
@@ -164,7 +164,7 @@ namespace KopiLua
 
 		private static void PrintHeader(Proto f)
 		{
-		 CharPtr s=getstr(f.source);
+		 CharPtr s=GetStr(f.source);
 		 if (s[0]=='@' || s[0]=='=')
 		  s  = s.next();
 		 else if (s[0]==LUA_SIGNATURE[0])
@@ -201,7 +201,7 @@ namespace KopiLua
 		 for (i=0; i<n; i++)
 		 {
 		  printf("\t%d\t%s\t%d\t%d\n",
-		  i,getstr(f.locvars[i].varname),f.locvars[i].startpc+1,f.locvars[i].endpc+1);
+		  i,GetStr(f.locvars[i].varname),f.locvars[i].startpc+1,f.locvars[i].endpc+1);
 		 }
 		}
 
@@ -212,7 +212,7 @@ namespace KopiLua
 		 if (f.upvalues==null) return;
 		 for (i=0; i<n; i++)
 		 {
-		  printf("\t%d\t%s\n",i,getstr(f.upvalues[i]));
+		  printf("\t%d\t%s\n",i,GetStr(f.upvalues[i]));
 		 }
 		}
 

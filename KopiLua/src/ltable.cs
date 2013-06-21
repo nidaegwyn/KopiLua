@@ -12,8 +12,8 @@ using System.Runtime.InteropServices;
 
 namespace KopiLua
 {
-	using TValue = Lua.lua_TValue;
-	using StkId = Lua.lua_TValue;
+	using TValue = Lua.LuaTypeValue;
+	using StkId = Lua.LuaTypeValue;
 	using lua_Number = System.Double;
 
 	public partial class Lua
@@ -32,7 +32,7 @@ namespace KopiLua
 		*/
 
 		internal static Node gnode(Table t, int i) { return t.node[i]; }
-		internal static TKey_nk gkey(Node n) { return n.i_key.nk; }
+		internal static TKeyNK gkey(Node n) { return n.i_key.nk; }
 		internal static TValue gval(Node n) { return n.i_val; }
 		internal static Node gnext(Node n) { return n.i_key.nk.next; }
 
@@ -54,7 +54,7 @@ namespace KopiLua
 
 
 		//public static Node gnode(Table t, int i)	{return t.node[i];}
-		internal static Node hashpow2(Table t, lua_Number n) { return gnode(t, (int)lmod(n, sizenode(t))); }
+		internal static Node hashpow2(Table t, lua_Number n) { return gnode(t, (int)lmod(n, SizeNode(t))); }
 		  
 		public static Node hashstr(Table t, TString str)  {return hashpow2(t, str.tsv.hash);}
 		public static Node hashboolean(Table t, int p)        {return hashpow2(t, p);}
@@ -64,7 +64,7 @@ namespace KopiLua
 		** for some types, it is better to avoid modulus by power of 2, as
 		** they tend to have many 2 factors.
 		*/
-		public static Node hashmod(Table t, int n) { return gnode(t, (int)((uint)n % ((sizenode(t) - 1) | 1))); }
+		public static Node hashmod(Table t, int n) { return gnode(t, (int)((uint)n % ((SizeNode(t) - 1) | 1))); }
 
 		public static Node hashpointer(Table t, object p) { return hashmod(t, p.GetHashCode()); }
 
@@ -79,7 +79,7 @@ namespace KopiLua
 		//{{null}, LUA_TNIL},  /* value */
 		  //{{{null}, LUA_TNIL, null}}  /* key */
 		//};
-		public static Node dummynode_ = new Node(new TValue(new Value(), LUA_TNIL), new TKey(new Value(), LUA_TNIL, null));
+		public static Node dummynode_ = new Node(new LuaTypeValue(new Value(), LUA_TNIL), new TKey(new Value(), LUA_TNIL, null));
 		public static Node dummynode = dummynode_;
 
 		/*
@@ -98,17 +98,17 @@ namespace KopiLua
 		** of its hash value)
 		*/
 		private static Node mainposition (Table t, TValue key) {
-		  switch (ttype(key)) {
+		  switch (TType(key)) {
 			case LUA_TNUMBER:
-			  return hashnum(t, nvalue(key));
+			  return hashnum(t, NValue(key));
 			case LUA_TSTRING:
-			  return hashstr(t, rawtsvalue(key));
+			  return hashstr(t, RawTSValue(key));
 			case LUA_TBOOLEAN:
-			  return hashboolean(t, bvalue(key));
+			  return hashboolean(t, BValue(key));
 			case LUA_TLIGHTUSERDATA:
-			  return hashpointer(t, pvalue(key));
+			  return hashpointer(t, PValue(key));
 			default:
-				return hashpointer(t, gcvalue(key));
+				return hashpointer(t, GCValue(key));
 		  }
 		}
 
@@ -118,11 +118,11 @@ namespace KopiLua
 		** the array part of the table, -1 otherwise.
 		*/
 		private static int arrayindex (TValue key) {
-		  if (ttisnumber(key)) {
-			lua_Number n = nvalue(key);
+		  if (TTIsNumber(key)) {
+			lua_Number n = NValue(key);
 			int k;
 			lua_number2int(out k, n);
-			if (luai_numeq(cast_num(k), n))
+			if (luai_numeq(CastNum(k), n))
 			  return k;
 		  }
 		  return -1;  /* `key' did not match some condition */
@@ -134,9 +134,9 @@ namespace KopiLua
 		** elements in the array part, then elements in the hash part. The
 		** beginning of a traversal is signalled by -1.
 		*/
-		private static int findindex (lua_State L, Table t, StkId key) {
+		private static int findindex (LuaState L, Table t, StkId key) {
 		  int i;
-		  if (ttisnil(key)) return -1;  /* first iteration */
+		  if (TTIsNil(key)) return -1;  /* first iteration */
 		  i = arrayindex(key);
 		  if (0 < i && i <= t.sizearray)  /* is `key' inside array part? */
 			return i-1;  /* yes; that's the index (corrected to C) */
@@ -144,34 +144,34 @@ namespace KopiLua
 			Node n = mainposition(t, key);
 			do {  /* check whether `key' is somewhere in the chain */
 			  /* key may be dead already, but it is ok to use it in `next' */
-			  if ((luaO_rawequalObj(key2tval(n), key) != 0) ||
-					(ttype(gkey(n)) == LUA_TDEADKEY && iscollectable(key) &&
-					 gcvalue(gkey(n)) == gcvalue(key))) {
-				i = cast_int(n - gnode(t, 0));  /* key index in hash table */
+			  if ((LuaORawEqualObj(key2tval(n), key) != 0) ||
+					(TType(gkey(n)) == LUATDEADKEY && IsCollectable(key) &&
+					 GCValue(gkey(n)) == GCValue(key))) {
+				i = CastInt(n - gnode(t, 0));  /* key index in hash table */
 				/* hash elements are numbered after array ones */
 				return i + t.sizearray;
 			  }
 			  else n = gnext(n);
 			} while (n != null);
-			luaG_runerror(L, "invalid key to " + LUA_QL("next"));  /* key not found */
+			LuaGRunError(L, "invalid key to " + LUA_QL("next"));  /* key not found */
 			return 0;  /* to avoid warnings */
 		  }
 		}
 
 
-		public static int luaH_next (lua_State L, Table t, StkId key) {
+		public static int luaH_next (LuaState L, Table t, StkId key) {
 		  int i = findindex(L, t, key);  /* find original element */
 		  for (i++; i < t.sizearray; i++) {  /* try first array part */
-			if (!ttisnil(t.array[i])) {  /* a non-nil value? */
-			  setnvalue(key, cast_num(i+1));
-			  setobj2s(L, key+1, t.array[i]);
+			if (!TTIsNil(t.array[i])) {  /* a non-nil value? */
+			  SetNValue(key, CastNum(i+1));
+			  SetObj2S(L, key+1, t.array[i]);
 			  return 1;
 			}
 		  }
-		  for (i -= t.sizearray; i < sizenode(t); i++) {  /* then hash part */
-			if (!ttisnil(gval(gnode(t, i)))) {  /* a non-nil value? */
-			  setobj2s(L, key, key2tval(gnode(t, i)));
-			  setobj2s(L, key+1, gval(gnode(t, i)));
+		  for (i -= t.sizearray; i < SizeNode(t); i++) {  /* then hash part */
+			if (!TTIsNil(gval(gnode(t, i)))) {  /* a non-nil value? */
+			  SetObj2S(L, key, key2tval(gnode(t, i)));
+			  SetObj2S(L, key+1, gval(gnode(t, i)));
 			  return 1;
 			}
 		  }
@@ -203,7 +203,7 @@ namespace KopiLua
 			if (a == narray) break;  /* all elements already counted */
 		  }
 		  narray = n;
-		  lua_assert(narray/2 <= na && na <= narray);
+		  LuaAssert(narray/2 <= na && na <= narray);
 		  return na;
 		}
 
@@ -211,7 +211,7 @@ namespace KopiLua
 		private static int countint (TValue key, int[] nums) {
 		  int k = arrayindex(key);
 		  if (0 < k && k <= MAXASIZE) {  /* is `key' an appropriate array index? */
-			nums[ceillog2(k)]++;  /* count as such */
+			nums[CeilLog2(k)]++;  /* count as such */
 			return 1;
 		  }
 		  else
@@ -234,7 +234,7 @@ namespace KopiLua
 			}
 			/* count elements in range (2^(lg-1), 2^lg] */
 			for (; i <= lim; i++) {
-			  if (!ttisnil(t.array[i-1]))
+			  if (!TTIsNil(t.array[i-1]))
 				lc++;
 			}
 			nums[lg] += lc;
@@ -247,10 +247,10 @@ namespace KopiLua
 		private static int numusehash (Table t, int[] nums, ref int pnasize) {
 		  int totaluse = 0;  /* total number of elements */
 		  int ause = 0;  /* summation of `nums' */
-		  int i = sizenode(t);
+		  int i = SizeNode(t);
 		  while ((i--) != 0) {
 			Node n = t.node[i];
-			if (!ttisnil(gval(n))) {
+			if (!TTIsNil(gval(n))) {
 			  ause += countint(key2tval(n), nums);
 			  totaluse++;
 			}
@@ -260,16 +260,16 @@ namespace KopiLua
 		}
 
 
-		private static void setarrayvector (lua_State L, Table t, int size) {
+		private static void setarrayvector (LuaState L, Table t, int size) {
 		  int i;
-		  luaM_reallocvector<TValue>(L, ref t.array, t.sizearray, size/*, TValue*/);
+		  LuaMReallocVector<TValue>(L, ref t.array, t.sizearray, size/*, TValue*/);
 		  for (i=t.sizearray; i<size; i++)
-			 setnilvalue(t.array[i]);
+			 SetNilValue(t.array[i]);
 		  t.sizearray = size;
 		}
 
 
-		private static void setnodevector (lua_State L, Table t, int size) {
+		private static void setnodevector (LuaState L, Table t, int size) {
 		  int lsize;
 		  if (size == 0) {  /* no elements to hash part? */
 			  t.node = new Node[] { dummynode };  /* use common `dummynode' */
@@ -277,25 +277,25 @@ namespace KopiLua
 		  }
 		  else {
 			int i;
-			lsize = ceillog2(size);
+			lsize = CeilLog2(size);
 			if (lsize > MAXBITS)
-			  luaG_runerror(L, "table overflow");
-			size = twoto(lsize);
-			Node[] nodes = luaM_newvector<Node>(L, size);
+			  LuaGRunError(L, "table overflow");
+			size = TwoTo(lsize);
+			Node[] nodes = LuaMNewVector<Node>(L, size);
 			t.node = nodes;
 			for (i=0; i<size; i++) {
 			  Node n = gnode(t, i);
 			  gnext_set(n, null);
-			  setnilvalue(gkey(n));
-			  setnilvalue(gval(n));
+			  SetNilValue(gkey(n));
+			  SetNilValue(gval(n));
 			}
 		  }
-		  t.lsizenode = cast_byte(lsize);
+		  t.lsizenode = CastByte(lsize);
 		  t.lastfree = size;  /* all positions are free */
 		}
 
 
-		private static void resize (lua_State L, Table t, int nasize, int nhsize) {
+		private static void resize (LuaState L, Table t, int nasize, int nhsize) {
 		  int i;
 		  int oldasize = t.sizearray;
 		  int oldhsize = t.lsizenode;
@@ -308,30 +308,30 @@ namespace KopiLua
 			t.sizearray = nasize;
 			/* re-insert elements from vanishing slice */
 			for (i=nasize; i<oldasize; i++) {
-			  if (!ttisnil(t.array[i]))
-				setobjt2t(L, luaH_setnum(L, t, i+1), t.array[i]);
+			  if (!TTIsNil(t.array[i]))
+				SetObjT2T(L, luaH_setnum(L, t, i+1), t.array[i]);
 			}
 			/* shrink array */
-			luaM_reallocvector<TValue>(L, ref t.array, oldasize, nasize/*, TValue*/);
+			LuaMReallocVector<TValue>(L, ref t.array, oldasize, nasize/*, TValue*/);
 		  }
 		  /* re-insert elements from hash part */
-		  for (i = twoto(oldhsize) - 1; i >= 0; i--) {
+		  for (i = TwoTo(oldhsize) - 1; i >= 0; i--) {
 			Node old = nold[i];
-			if (!ttisnil(gval(old)))
-			  setobjt2t(L, luaH_set(L, t, key2tval(old)), gval(old));
+			if (!TTIsNil(gval(old)))
+			  SetObjT2T(L, luaH_set(L, t, key2tval(old)), gval(old));
 		  }
 		  if (nold[0] != dummynode)
-			luaM_freearray(L, nold);  /* free old array */
+			LuaMFreeArray(L, nold);  /* free old array */
 		}
 
 
-		public static void luaH_resizearray (lua_State L, Table t, int nasize) {
-		  int nsize = (t.node[0] == dummynode) ? 0 : sizenode(t);
+		public static void luaH_resizearray (LuaState L, Table t, int nasize) {
+		  int nsize = (t.node[0] == dummynode) ? 0 : SizeNode(t);
 		  resize(L, t, nasize, nsize);
 		}
 
 
-		private static void rehash (lua_State L, Table t, TValue ek) {
+		private static void rehash (LuaState L, Table t, TValue ek) {
 		  int nasize, na;
 		  int[] nums = new int[MAXBITS+1];  /* nums[i] = number of keys between 2^(i-1) and 2^i */
 		  int i;
@@ -356,11 +356,11 @@ namespace KopiLua
 		*/
 
 
-		public static Table luaH_new (lua_State L, int narray, int nhash) {
-		  Table t = luaM_new<Table>(L);
-		  luaC_link(L, obj2gco(t), LUA_TTABLE);
+		public static Table luaH_new (LuaState L, int narray, int nhash) {
+		  Table t = LuaMNew<Table>(L);
+		  LuaCLink(L, obj2gco(t), LUA_TTABLE);
 		  t.metatable = null;
-		  t.flags = cast_byte(~0);
+		  t.flags = CastByte(~0);
 		  /* temporary values (kept only if some malloc fails) */
 		  t.array = null;
 		  t.sizearray = 0;
@@ -372,17 +372,17 @@ namespace KopiLua
 		}
 
 
-		public static void luaH_free (lua_State L, Table t) {
+		public static void luaH_free (LuaState L, Table t) {
 		  if (t.node[0] != dummynode)
-			luaM_freearray(L, t.node);
-		  luaM_freearray(L, t.array);
-		  luaM_free(L, t);
+			LuaMFreeArray(L, t.node);
+		  LuaMFreeArray(L, t.array);
+		  LuaMFree(L, t);
 		}
 
 
 		private static Node getfreepos (Table t) {
 		  while (t.lastfree-- > 0) {
-			if (ttisnil(gkey(t.node[t.lastfree])))
+			if (TTIsNil(gkey(t.node[t.lastfree])))
 			  return t.node[t.lastfree];
 		  }
 		  return null;  /* could not find a free place */
@@ -397,25 +397,25 @@ namespace KopiLua
 		** put new key in its main position; otherwise (colliding node is in its main 
 		** position), new key goes to an empty position. 
 		*/
-		private static TValue newkey (lua_State L, Table t, TValue key) {
+		private static TValue newkey (LuaState L, Table t, TValue key) {
 		  Node mp = mainposition(t, key);
-		  if (!ttisnil(gval(mp)) || mp == dummynode) {
+		  if (!TTIsNil(gval(mp)) || mp == dummynode) {
 			Node othern;
 			Node n = getfreepos(t);  /* get a free place */
 			if (n == null) {  /* cannot find a free place? */
 			  rehash(L, t, key);  /* grow table */
 			  return luaH_set(L, t, key);  /* re-insert key into grown table */
 			}
-			lua_assert(n != dummynode);
+			LuaAssert(n != dummynode);
 			othern = mainposition(t, key2tval(mp));
 			if (othern != mp) {  /* is colliding node out of its main position? */
 			  /* yes; move colliding node into free position */
 			  while (gnext(othern) != mp) othern = gnext(othern);  /* find previous */
 			  gnext_set(othern, n);  /* redo the chain with `n' in place of `mp' */
-			  n.i_val = new TValue(mp.i_val);	/* copy colliding node into free pos. (mp.next also goes) */
+			  n.i_val = new LuaTypeValue(mp.i_val);	/* copy colliding node into free pos. (mp.next also goes) */
 			  n.i_key = new TKey(mp.i_key);
 			  gnext_set(mp, null);  /* now `mp' is free */
-			  setnilvalue(gval(mp));
+			  SetNilValue(gval(mp));
 			}
 			else {  /* colliding node is in its own main position */
 			  /* new node will go into free position */
@@ -425,8 +425,8 @@ namespace KopiLua
 			}
 		  }
 		  gkey(mp).value.Copy(key.value); gkey(mp).tt = key.tt;
-		  luaC_barriert(L, t, key);
-		  lua_assert(ttisnil(gval(mp)));
+		  LuaCBarrierT(L, t, key);
+		  LuaAssert(TTIsNil(gval(mp)));
 		  return gval(mp);
 		}
 
@@ -439,14 +439,14 @@ namespace KopiLua
 		  if ((uint)(key-1) < (uint)t.sizearray)
 			return t.array[key-1];
 		  else {
-			lua_Number nk = cast_num(key);
+			lua_Number nk = CastNum(key);
 			Node n = hashnum(t, nk);
 			do {  /* check whether `key' is somewhere in the chain */
-			  if (ttisnumber(gkey(n)) && luai_numeq(nvalue(gkey(n)), nk))
+			  if (TTIsNumber(gkey(n)) && luai_numeq(NValue(gkey(n)), nk))
 				return gval(n);  /* that's it */
 			  else n = gnext(n);
 			} while (n != null);
-			return luaO_nilobject;
+			return LuaONilObject;
 		  }
 		}
 
@@ -457,11 +457,11 @@ namespace KopiLua
 		public static TValue luaH_getstr (Table t, TString key) {
 		  Node n = hashstr(t, key);
 		  do {  /* check whether `key' is somewhere in the chain */
-			if (ttisstring(gkey(n)) && rawtsvalue(gkey(n)) == key)
+			if (TTIsString(gkey(n)) && RawTSValue(gkey(n)) == key)
 			  return gval(n);  /* that's it */
 			else n = gnext(n);
 		  } while (n != null);
-		  return luaO_nilobject;
+		  return LuaONilObject;
 		}
 
 
@@ -469,70 +469,70 @@ namespace KopiLua
 		** main search function
 		*/
 		public static TValue luaH_get (Table t, TValue key) {
-		  switch (ttype(key)) {
-			case LUA_TNIL: return luaO_nilobject;
-			case LUA_TSTRING: return luaH_getstr(t, rawtsvalue(key));
+		  switch (TType(key)) {
+			case LUA_TNIL: return LuaONilObject;
+			case LUA_TSTRING: return luaH_getstr(t, RawTSValue(key));
 			case LUA_TNUMBER: {
 			  int k;
-			  lua_Number n = nvalue(key);
+			  lua_Number n = NValue(key);
 			  lua_number2int(out k, n);
-			  if (luai_numeq(cast_num(k), nvalue(key))) /* index is int? */
+			  if (luai_numeq(CastNum(k), NValue(key))) /* index is int? */
 				return luaH_getnum(t, k);  /* use specialized version */
 			  /* else go through ... actually on second thoughts don't, because this is C#*/
 				Node node = mainposition(t, key);
 				do
 				{  /* check whether `key' is somewhere in the chain */
-					if (luaO_rawequalObj(key2tval(node), key) != 0)
+					if (LuaORawEqualObj(key2tval(node), key) != 0)
 						return gval(node);  /* that's it */
 					else node = gnext(node);
 				} while (node != null);
-				return luaO_nilobject;
+				return LuaONilObject;
 			}
 			default: {
 				Node node = mainposition(t, key);
 			  do {  /* check whether `key' is somewhere in the chain */
-				if (luaO_rawequalObj(key2tval(node), key) != 0)
+				if (LuaORawEqualObj(key2tval(node), key) != 0)
 				  return gval(node);  /* that's it */
 				else node = gnext(node);
 			  } while (node != null);
-			  return luaO_nilobject;
+			  return LuaONilObject;
 			}
 		  }
 		}
 
 
-		public static TValue luaH_set (lua_State L, Table t, TValue key) {
+		public static TValue luaH_set (LuaState L, Table t, TValue key) {
 		  TValue p = luaH_get(t, key);
 		  t.flags = 0;
-		  if (p != luaO_nilobject)
+		  if (p != LuaONilObject)
 			return (TValue)p;
 		  else {
-			if (ttisnil(key)) luaG_runerror(L, "table index is nil");
-			else if (ttisnumber(key) && luai_numisnan(nvalue(key)))
-			  luaG_runerror(L, "table index is NaN");
+			if (TTIsNil(key)) LuaGRunError(L, "table index is nil");
+			else if (TTIsNumber(key) && luai_numisnan(NValue(key)))
+			  LuaGRunError(L, "table index is NaN");
 			return newkey(L, t, key);
 		  }
 		}
 
 
-		public static TValue luaH_setnum (lua_State L, Table t, int key) {
+		public static TValue luaH_setnum (LuaState L, Table t, int key) {
 		  TValue p = luaH_getnum(t, key);
-		  if (p != luaO_nilobject)
+		  if (p != LuaONilObject)
 			return (TValue)p;
 		  else {
-			TValue k = new TValue();
-			setnvalue(k, cast_num(key));
+			TValue k = new LuaTypeValue();
+			SetNValue(k, CastNum(key));
 			return newkey(L, t, k);
 		  }
 		}
 
-		public static TValue luaH_setstr (lua_State L, Table t, TString key) {
+		public static TValue luaH_setstr (LuaState L, Table t, TString key) {
 		  TValue p = luaH_getstr(t, key);
-		  if (p != luaO_nilobject)
+		  if (p != LuaONilObject)
 			return (TValue)p;
 		  else {
-			TValue k = new TValue();
-			setsvalue(L, k, key);
+			TValue k = new LuaTypeValue();
+			SetSValue(L, k, key);
 			return newkey(L, t, k);
 		  }
 		}
@@ -542,20 +542,20 @@ namespace KopiLua
 		  uint i = j;  /* i is zero or a present index */
 		  j++;
 		  /* find `i' and `j' such that i is present and j is not */
-		  while (!ttisnil(luaH_getnum(t, (int)j))) {
+		  while (!TTIsNil(luaH_getnum(t, (int)j))) {
 			i = j;
 			j *= 2;
-			if (j > (uint)MAX_INT) {  /* overflow? */
+			if (j > (uint)MAXINT) {  /* overflow? */
 			  /* table was built with bad purposes: resort to linear search */
 			  i = 1;
-			  while (!ttisnil(luaH_getnum(t, (int)i))) i++;
+			  while (!TTIsNil(luaH_getnum(t, (int)i))) i++;
 			  return (int)(i - 1);
 			}
 		  }
 		  /* now do a binary search between them */
 		  while (j - i > 1) {
 			uint m = (i+j)/2;
-			if (ttisnil(luaH_getnum(t, (int)m))) j = m;
+			if (TTIsNil(luaH_getnum(t, (int)m))) j = m;
 			else i = m;
 		  }
 		  return (int)i;
@@ -568,12 +568,12 @@ namespace KopiLua
 		*/
 		public static int luaH_getn (Table t) {
 		  uint j = (uint)t.sizearray;
-		  if (j > 0 && ttisnil(t.array[j - 1])) {
+		  if (j > 0 && TTIsNil(t.array[j - 1])) {
 			/* there is a boundary in the array part: (binary) search for it */
 			uint i = 0;
 			while (j - i > 1) {
 			  uint m = (i+j)/2;
-			  if (ttisnil(t.array[m - 1])) j = m;
+			  if (TTIsNil(t.array[m - 1])) j = m;
 			  else i = m;
 			}
 			return (int)i;

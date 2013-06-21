@@ -103,7 +103,7 @@ namespace KopiLua
 		  public Table h;  /* table to find (and reuse) elements in `k' */
 		  public FuncState prev;  /* enclosing function */
 		  public LexState ls;  /* lexical state */
-		  public lua_State L;  /* copy of the Lua state */
+		  public LuaState L;  /* copy of the Lua state */
 		  public BlockCnt bl;  /* chain of current blocks */
 		  public int pc;  /* next position to code (equivalent to `ncode') */
 		  public int lasttarget;   /* `pc' of last `jump target' */
@@ -142,29 +142,29 @@ namespace KopiLua
 		private static void anchor_token (LexState ls) {
 		  if (ls.t.token == (int)RESERVED.TK_NAME || ls.t.token == (int)RESERVED.TK_STRING) {
 			TString ts = ls.t.seminfo.ts;
-			luaX_newstring(ls, getstr(ts), ts.tsv.len);
+			LuaXNewString(ls, GetStr(ts), ts.tsv.len);
 		  }
 		}
 
 
 		private static void error_expected (LexState ls, int token) {
-		  luaX_syntaxerror(ls,
-			  luaO_pushfstring(ls.L, LUA_QS + " expected", luaX_token2str(ls, token)));
+		  LuaXSyntaxError(ls,
+			  LuaOPushFString(ls.L, LUA_QS + " expected", LuaXTokenToString(ls, token)));
 		}
 
 
 		private static void errorlimit (FuncState fs, int limit, CharPtr what) {
 		  CharPtr msg = (fs.f.linedefined == 0) ?
-			luaO_pushfstring(fs.L, "main function has more than %d %s", limit, what) :
-			luaO_pushfstring(fs.L, "function at line %d has more than %d %s",
+			LuaOPushFString(fs.L, "main function has more than %d %s", limit, what) :
+			LuaOPushFString(fs.L, "function at line %d has more than %d %s",
 									fs.f.linedefined, limit, what);
-		  luaX_lexerror(fs.ls, msg, 0);
+		  LuaXLexError(fs.ls, msg, 0);
 		}
 
 
 		private static int testnext (LexState ls, int c) {
 		  if (ls.t.token == c) {
-			luaX_next(ls);
+			LuaXNext(ls);
 			return 1;
 		  }
 		  else return 0;
@@ -178,12 +178,12 @@ namespace KopiLua
 
 		private static void checknext (LexState ls, int c) {
 		  check(ls, c);
-		  luaX_next(ls);
+		  LuaXNext(ls);
 		}
 
 
 		public static void check_condition(LexState ls, bool c, CharPtr msg)	{
-			if (!(c)) luaX_syntaxerror(ls, msg);
+			if (!(c)) LuaXSyntaxError(ls, msg);
 		}
 
 		private static void check_match (LexState ls, int what, int who, int where) {
@@ -191,9 +191,9 @@ namespace KopiLua
 			if (where == ls.linenumber)
 			  error_expected(ls, what);
 			else {
-			  luaX_syntaxerror(ls, luaO_pushfstring(ls.L,
+			  LuaXSyntaxError(ls, LuaOPushFString(ls.L,
 					 LUA_QS + " expected (to close " + LUA_QS + " at line %d)",
-					  luaX_token2str(ls, what), luaX_token2str(ls, who), where));
+					  LuaXTokenToString(ls, what), LuaXTokenToString(ls, who), where));
 			}
 		  }
 		}
@@ -202,7 +202,7 @@ namespace KopiLua
 		  TString ts;
 		  check(ls, (int)RESERVED.TK_NAME);
 		  ts = ls.t.seminfo.ts;
-		  luaX_next(ls);
+		  LuaXNext(ls);
 		  return ts;
 		}
 
@@ -215,7 +215,7 @@ namespace KopiLua
 
 
 		private static void codestring (LexState ls, expdesc e, TString s) {
-			init_exp(e, expkind.VK, luaK_stringK(ls.fs, s));
+			init_exp(e, expkind.VK, LuaKStringK(ls.fs, s));
 		}
 
 
@@ -228,17 +228,17 @@ namespace KopiLua
 		  FuncState fs = ls.fs;
 		  Proto f = fs.f;
 		  int oldsize = f.sizelocvars;
-		  luaM_growvector(ls.L, ref f.locvars, fs.nlocvars, ref f.sizelocvars,
+		  LuaMGrowVector(ls.L, ref f.locvars, fs.nlocvars, ref f.sizelocvars,
 						  (int)SHRT_MAX, "too many local variables");
 		  while (oldsize < f.sizelocvars) f.locvars[oldsize++].varname = null;
 		  f.locvars[fs.nlocvars].varname = varname;
-		  luaC_objbarrier(ls.L, f, varname);
+		  LuaCObjBarrier(ls.L, f, varname);
 		  return fs.nlocvars++;
 		}
 
 
 		public static void new_localvarliteral(LexState ls, CharPtr v, int n) {
-			new_localvar(ls, luaX_newstring(ls, "" + v, (uint)(v.chars.Length - 1)), n);
+			new_localvar(ls, LuaXNewString(ls, "" + v, (uint)(v.chars.Length - 1)), n);
 		}
 
 
@@ -251,7 +251,7 @@ namespace KopiLua
 
 		private static void adjustlocalvars (LexState ls, int nvars) {
 		  FuncState fs = ls.fs;
-		  fs.nactvar = cast_byte(fs.nactvar + nvars);
+		  fs.nactvar = CastByte(fs.nactvar + nvars);
 		  for (; nvars!=0; nvars--) {
 			getlocvar(fs, fs.nactvar - nvars).startpc = fs.pc;
 		  }
@@ -271,19 +271,19 @@ namespace KopiLua
 		  int oldsize = f.sizeupvalues;
 		  for (i=0; i<f.nups; i++) {
 			if ((int)fs.upvalues[i].k == (int)v.k && fs.upvalues[i].info == v.u.s.info) {
-			  lua_assert(f.upvalues[i] == name);
+			  LuaAssert(f.upvalues[i] == name);
 			  return i;
 			}
 		  }
 		  /* new one */
 		  luaY_checklimit(fs, f.nups + 1, LUAI_MAXUPVALUES, "upvalues");
-		  luaM_growvector(fs.L, ref f.upvalues, f.nups, ref f.sizeupvalues, MAX_INT, "");
+		  LuaMGrowVector(fs.L, ref f.upvalues, f.nups, ref f.sizeupvalues, MAXINT, "");
 		  while (oldsize < f.sizeupvalues) f.upvalues[oldsize++] = null;
 		  f.upvalues[f.nups] = name;
-		  luaC_objbarrier(fs.L, f, name);
-		  lua_assert(v.k == expkind.VLOCAL || v.k == expkind.VUPVAL);
-		  fs.upvalues[f.nups].k = cast_byte(v.k);
-		  fs.upvalues[f.nups].info = cast_byte(v.u.s.info);
+		  LuaCObjBarrier(fs.L, f, name);
+		  LuaAssert(v.k == expkind.VLOCAL || v.k == expkind.VUPVAL);
+		  fs.upvalues[f.nups].k = CastByte(v.k);
+		  fs.upvalues[f.nups].info = CastByte(v.u.s.info);
 		  return f.nups++;
 		}
 
@@ -334,7 +334,7 @@ namespace KopiLua
 		  TString varname = str_checkname(ls);
 		  FuncState fs = ls.fs;
 		  if (singlevaraux(fs, varname, var, 1) == expkind.VGLOBAL)
-			var.u.s.info = luaK_stringK(fs, varname);  /* info points to global name */
+			var.u.s.info = LuaKStringK(fs, varname);  /* info points to global name */
 		}
 
 
@@ -344,15 +344,15 @@ namespace KopiLua
 		  if (hasmultret(e.k) != 0) {
 			extra++;  /* includes call itself */
 			if (extra < 0) extra = 0;
-			luaK_setreturns(fs, e, extra);  /* last exp. provides the difference */
-			if (extra > 1) luaK_reserveregs(fs, extra-1);
+			LuaKSetReturns(fs, e, extra);  /* last exp. provides the difference */
+			if (extra > 1) LuaKReserveRegs(fs, extra-1);
 		  }
 		  else {
-			if (e.k != expkind.VVOID) luaK_exp2nextreg(fs, e);  /* close last expression */
+			if (e.k != expkind.VVOID) LuaKExp2NextReg(fs, e);  /* close last expression */
 			if (extra > 0) {
 			  int reg = fs.freereg;
-			  luaK_reserveregs(fs, extra);
-			  luaK_nil(fs, reg, extra);
+			  LuaKReserveRegs(fs, extra);
+			  LuaKNil(fs, reg, extra);
 			}
 		  }
 		}
@@ -360,7 +360,7 @@ namespace KopiLua
 
 		private static void enterlevel (LexState ls) {
 		  if (++ls.L.nCcalls > LUAI_MAXCCALLS)
-			luaX_lexerror(ls, "chunk has too many syntax levels", 0);
+			LuaXLexError(ls, "chunk has too many syntax levels", 0);
 		}
 
 
@@ -374,7 +374,7 @@ namespace KopiLua
 		  bl.upval = 0;
 		  bl.previous = fs.bl;
 		  fs.bl = bl;
-		  lua_assert(fs.freereg == fs.nactvar);
+		  LuaAssert(fs.freereg == fs.nactvar);
 		}
 
 
@@ -383,12 +383,12 @@ namespace KopiLua
 		  fs.bl = bl.previous;
 		  removevars(fs.ls, bl.nactvar);
 		  if (bl.upval != 0)
-			luaK_codeABC(fs, OpCode.OP_CLOSE, bl.nactvar, 0, 0);
+			LuaKCodeABC(fs, OpCode.OP_CLOSE, bl.nactvar, 0, 0);
 		  /* a block either controls scope or breaks (never both) */
-		  lua_assert((bl.isbreakable==0) || (bl.upval==0));
-		  lua_assert(bl.nactvar == fs.nactvar);
+		  LuaAssert((bl.isbreakable==0) || (bl.upval==0));
+		  LuaAssert(bl.nactvar == fs.nactvar);
 		  fs.freereg = fs.nactvar;  /* free registers */
-		  luaK_patchtohere(fs, bl.breaklist);
+		  LuaKPatchToHere(fs, bl.breaklist);
 		}
 
 
@@ -397,22 +397,22 @@ namespace KopiLua
 		  Proto f = fs.f;
 		  int oldsize = f.sizep;
 		  int i;
-		  luaM_growvector(ls.L, ref f.p, fs.np, ref f.sizep, 
+		  LuaMGrowVector(ls.L, ref f.p, fs.np, ref f.sizep, 
 						  MAXARG_Bx, "constant table overflow");
 		  while (oldsize < f.sizep) f.p[oldsize++] = null;
 		  f.p[fs.np++] = func.f;
-		  luaC_objbarrier(ls.L, f, func.f);
-		  init_exp(v, expkind.VRELOCABLE, luaK_codeABx(fs, OpCode.OP_CLOSURE, 0, fs.np - 1));
+		  LuaCObjBarrier(ls.L, f, func.f);
+		  init_exp(v, expkind.VRELOCABLE, LuaKCodeABx(fs, OpCode.OP_CLOSURE, 0, fs.np - 1));
 		  for (i=0; i<func.f.nups; i++) {
 			OpCode o = ((int)func.upvalues[i].k == (int)expkind.VLOCAL) ? OpCode.OP_MOVE : OpCode.OP_GETUPVAL;
-			luaK_codeABC(fs, o, 0, func.upvalues[i].info, 0);
+			LuaKCodeABC(fs, o, 0, func.upvalues[i].info, 0);
 		  }
 		}
 
 
 		private static void open_func (LexState ls, FuncState fs) {
-		  lua_State L = ls.L;
-		  Proto f = luaF_newproto(L);
+		  LuaState L = ls.L;
+		  Proto f = LuaFNewProto(L);
 		  fs.f = f;
 		  fs.prev = ls.fs;  /* linked list of funcstates */
 		  fs.ls = ls;
@@ -431,37 +431,37 @@ namespace KopiLua
 		  f.maxstacksize = 2;  /* registers 0/1 are always valid */
 		  fs.h = luaH_new(L, 0, 0);
 		  /* anchor table of constants and prototype (to avoid being collected) */
-		  sethvalue2s(L, L.top, fs.h);
-		  incr_top(L);
-		  setptvalue2s(L, L.top, f);
-		  incr_top(L);
+		  SetHValue2S(L, L.top, fs.h);
+		  IncrTop(L);
+		  SetPTValue2S(L, L.top, f);
+		  IncrTop(L);
 		}
 
 		private static void close_func (LexState ls) {
-		  lua_State L = ls.L;
+		  LuaState L = ls.L;
 		  FuncState fs = ls.fs;
 		  Proto f = fs.f;
 		  removevars(ls, 0);
-		  luaK_ret(fs, 0, 0);  /* final return */
-		  luaM_reallocvector(L, ref f.code, f.sizecode, fs.pc/*, typeof(Instruction)*/);
+		  LuaKRet(fs, 0, 0);  /* final return */
+		  LuaMReallocVector(L, ref f.code, f.sizecode, fs.pc/*, typeof(Instruction)*/);
 		  f.sizecode = fs.pc;
-		  luaM_reallocvector(L, ref f.lineinfo, f.sizelineinfo, fs.pc/*, typeof(int)*/);
+		  LuaMReallocVector(L, ref f.lineinfo, f.sizelineinfo, fs.pc/*, typeof(int)*/);
 		  f.sizelineinfo = fs.pc;
-		  luaM_reallocvector(L, ref f.k, f.sizek, fs.nk/*, TValue*/);
+		  LuaMReallocVector(L, ref f.k, f.sizek, fs.nk/*, TValue*/);
 		  f.sizek = fs.nk;
-		  luaM_reallocvector(L, ref f.p, f.sizep, fs.np/*, Proto*/);		  
+		  LuaMReallocVector(L, ref f.p, f.sizep, fs.np/*, Proto*/);		  
 		  f.sizep = fs.np;
 		  for (int i = 0; i < f.p.Length; i++)
 		  {
 			  f.p[i].protos = f.p;
 			  f.p[i].index = i;
 		  }
-		  luaM_reallocvector(L, ref f.locvars, f.sizelocvars, fs.nlocvars/*, LocVar*/);
+		  LuaMReallocVector(L, ref f.locvars, f.sizelocvars, fs.nlocvars/*, LocVar*/);
 		  f.sizelocvars = fs.nlocvars;
-		  luaM_reallocvector(L, ref f.upvalues, f.sizeupvalues, f.nups/*, TString*/);
+		  LuaMReallocVector(L, ref f.upvalues, f.sizeupvalues, f.nups/*, TString*/);
 		  f.sizeupvalues = f.nups;
-		  lua_assert(luaG_checkcode(f));
-		  lua_assert(fs.bl == null);
+		  LuaAssert(LuaGCheckCode(f));
+		  LuaAssert(fs.bl == null);
 		  ls.fs = fs.prev;
 		  /* last token read was anchored in defunct function; must reanchor it */
 		  if (fs!=null) anchor_token(ls);
@@ -469,21 +469,21 @@ namespace KopiLua
 		}
 
 
-		public static Proto luaY_parser (lua_State L, ZIO z, Mbuffer buff, CharPtr name) {
+		public static Proto luaY_parser (LuaState L, ZIO z, Mbuffer buff, CharPtr name) {
 		  LexState lexstate = new LexState();
 		  FuncState funcstate = new FuncState();
 		  lexstate.buff = buff;
-		  luaX_setinput(L, lexstate, z, luaS_new(L, name));
+		  LuaXSetInput(L, lexstate, z, luaS_new(L, name));
 		  open_func(lexstate, funcstate);
 		  funcstate.f.is_vararg = VARARG_ISVARARG;  /* main func. is always vararg */
-		  luaX_next(lexstate);  /* read first token */
+		  LuaXNext(lexstate);  /* read first token */
  		  System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 		  chunk(lexstate);
 		  check(lexstate, (int)RESERVED.TK_EOS);
 		  close_func(lexstate);
-		  lua_assert(funcstate.prev == null);
-		  lua_assert(funcstate.f.nups == 0);
-		  lua_assert(lexstate.fs == null);
+		  LuaAssert(funcstate.prev == null);
+		  LuaAssert(funcstate.f.nups == 0);
+		  LuaAssert(lexstate.fs == null);
 		  return funcstate.f;
 		}
 
@@ -498,18 +498,18 @@ namespace KopiLua
 		  /* field . ['.' | ':'] NAME */
 		  FuncState fs = ls.fs;
 		  expdesc key = new expdesc();
-		  luaK_exp2anyreg(fs, v);
-		  luaX_next(ls);  /* skip the dot or colon */
+		  LuaKExp2AnyReg(fs, v);
+		  LuaXNext(ls);  /* skip the dot or colon */
 		  checkname(ls, key);
-		  luaK_indexed(fs, v, key);
+		  LuaKIndexed(fs, v, key);
 		}
 
 
 		private static void yindex (LexState ls, expdesc v) {
 		  /* index . '[' expr ']' */
-		  luaX_next(ls);  /* skip the '[' */
+		  LuaXNext(ls);  /* skip the '[' */
 		  expr(ls, v);
-		  luaK_exp2val(ls.fs, v);
+		  LuaKExp2Val(ls.fs, v);
 		  checknext(ls, ']');
 		}
 
@@ -537,26 +537,26 @@ namespace KopiLua
 		  expdesc key = new expdesc(), val = new expdesc();
 		  int rkkey;
 		  if (ls.t.token == (int)RESERVED.TK_NAME) {
-			luaY_checklimit(fs, cc.nh, MAX_INT, "items in a constructor");
+			luaY_checklimit(fs, cc.nh, MAXINT, "items in a constructor");
 			checkname(ls, key);
 		  }
 		  else  /* ls.t.token == '[' */
 			yindex(ls, key);
 		  cc.nh++;
 		  checknext(ls, '=');
-		  rkkey = luaK_exp2RK(fs, key);
+		  rkkey = LuaKExp2RK(fs, key);
 		  expr(ls, val);
-		  luaK_codeABC(fs, OpCode.OP_SETTABLE, cc.t.u.s.info, rkkey, luaK_exp2RK(fs, val));
+		  LuaKCodeABC(fs, OpCode.OP_SETTABLE, cc.t.u.s.info, rkkey, LuaKExp2RK(fs, val));
 		  fs.freereg = reg;  /* free registers */
 		}
 
 
 		private static void closelistfield (FuncState fs, ConsControl cc) {
 		  if (cc.v.k == expkind.VVOID) return;  /* there is no list item */
-		  luaK_exp2nextreg(fs, cc.v);
+		  LuaKExp2NextReg(fs, cc.v);
 		  cc.v.k = expkind.VVOID;
 		  if (cc.tostore == LFIELDS_PER_FLUSH) {
-			luaK_setlist(fs, cc.t.u.s.info, cc.na, cc.tostore);  /* flush */
+			LuaKSetList(fs, cc.t.u.s.info, cc.na, cc.tostore);  /* flush */
 			cc.tostore = 0;  /* no more items pending */
 		  }
 		}
@@ -565,21 +565,21 @@ namespace KopiLua
 		private static void lastlistfield (FuncState fs, ConsControl cc) {
 		  if (cc.tostore == 0) return;
 		  if (hasmultret(cc.v.k) != 0) {
-			luaK_setmultret(fs, cc.v);
-			luaK_setlist(fs, cc.t.u.s.info, cc.na, LUA_MULTRET);
+			LuaKSetMultRet(fs, cc.v);
+			LuaKSetList(fs, cc.t.u.s.info, cc.na, LUA_MULTRET);
 			cc.na--;  /* do not count last expression (unknown number of elements) */
 		  }
 		  else {
 			if (cc.v.k != expkind.VVOID)
-			  luaK_exp2nextreg(fs, cc.v);
-			luaK_setlist(fs, cc.t.u.s.info, cc.na, cc.tostore);
+			  LuaKExp2NextReg(fs, cc.v);
+			LuaKSetList(fs, cc.t.u.s.info, cc.na, cc.tostore);
 		  }
 		}
 
 
 		private static void listfield (LexState ls, ConsControl cc) {
 		  expr(ls, cc.v);
-		  luaY_checklimit(ls.fs, cc.na, MAX_INT, "items in a constructor");
+		  luaY_checklimit(ls.fs, cc.na, MAXINT, "items in a constructor");
 		  cc.na++;
 		  cc.tostore++;
 		}
@@ -589,21 +589,21 @@ namespace KopiLua
 		  /* constructor . ?? */
 		  FuncState fs = ls.fs;
 		  int line = ls.linenumber;
-		  int pc = luaK_codeABC(fs, OpCode.OP_NEWTABLE, 0, 0, 0);
+		  int pc = LuaKCodeABC(fs, OpCode.OP_NEWTABLE, 0, 0, 0);
 		  ConsControl cc = new ConsControl();
 		  cc.na = cc.nh = cc.tostore = 0;
 		  cc.t = t;
 		  init_exp(t, expkind.VRELOCABLE, pc);
 		  init_exp(cc.v, expkind.VVOID, 0);  /* no value (yet) */
-		  luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top (for gc) */
+		  LuaKExp2NextReg(ls.fs, t);  /* fix it at stack top (for gc) */
 		  checknext(ls, '{');
 		  do {
-			lua_assert(cc.v.k == expkind.VVOID || cc.tostore > 0);
+			LuaAssert(cc.v.k == expkind.VVOID || cc.tostore > 0);
 			if (ls.t.token == '}') break;
 			closelistfield(fs, cc);
 			switch(ls.t.token) {
 			  case (int)RESERVED.TK_NAME: {  /* may be listfields or recfields */
-				luaX_lookahead(ls);
+				LuaXLookAhead(ls);
 				if (ls.lookahead.token != '=')  /* expression? */
 				  listfield(ls, cc);
 				else
@@ -622,8 +622,8 @@ namespace KopiLua
 		  } while ((testnext(ls, ',')!=0) || (testnext(ls, ';')!=0));
 		  check_match(ls, '}', '{', line);
 		  lastlistfield(fs, cc);
-		  SETARG_B(new InstructionPtr(fs.f.code, pc), luaO_int2fb((uint)cc.na)); /* set initial array size */
-		  SETARG_C(new InstructionPtr(fs.f.code, pc), luaO_int2fb((uint)cc.nh));  /* set initial table size */
+		  SETARG_B(new InstructionPtr(fs.f.code, pc), LuaOInt2FB((uint)cc.na)); /* set initial array size */
+		  SETARG_C(new InstructionPtr(fs.f.code, pc), LuaOInt2FB((uint)cc.nh));  /* set initial table size */
 		}
 
 		/* }====================================================================== */
@@ -644,7 +644,7 @@ namespace KopiLua
 				  break;
 				}
 				case (int)RESERVED.TK_DOTS: {  /* param . `...' */
-				  luaX_next(ls);
+				  LuaXNext(ls);
 		#if LUA_COMPAT_VARARG
 		          /* use `arg' as default name */
 		          new_localvarliteral(ls, "arg", nparams++);
@@ -653,13 +653,13 @@ namespace KopiLua
 				  f.is_vararg |= VARARG_ISVARARG;
 				  break;
 				}
-				default: luaX_syntaxerror(ls, "<name> or " + LUA_QL("...") + " expected"); break;
+				default: LuaXSyntaxError(ls, "<name> or " + LUA_QL("...") + " expected"); break;
 			  }
 			} while ((f.is_vararg==0) && (testnext(ls, ',')!=0));
 		  }
 		  adjustlocalvars(ls, nparams);
-		  f.numparams = cast_byte(fs.nactvar - (f.is_vararg & VARARG_HASARG));
-		  luaK_reserveregs(fs, fs.nactvar);  /* reserve register for parameters */
+		  f.numparams = CastByte(fs.nactvar - (f.is_vararg & VARARG_HASARG));
+		  LuaKReserveRegs(fs, fs.nactvar);  /* reserve register for parameters */
 		}
 
 
@@ -688,7 +688,7 @@ namespace KopiLua
 		  int n = 1;  /* at least one expression */
 		  expr(ls, v);
 		  while (testnext(ls, ',') != 0) {
-			luaK_exp2nextreg(ls.fs, v);
+			LuaKExp2NextReg(ls.fs, v);
 			expr(ls, v);
 			n++;
 		  }
@@ -704,13 +704,13 @@ namespace KopiLua
 		  switch (ls.t.token) {
 			case '(': {  /* funcargs . `(' [ explist1 ] `)' */
 			  if (line != ls.lastline)
-				luaX_syntaxerror(ls,"ambiguous syntax (function call x new statement)");
-			  luaX_next(ls);
+				LuaXSyntaxError(ls,"ambiguous syntax (function call x new statement)");
+			  LuaXNext(ls);
 			  if (ls.t.token == ')')  /* arg list is empty? */
 				args.k = expkind.VVOID;
 			  else {
 				explist1(ls, args);
-				luaK_setmultret(fs, args);
+				LuaKSetMultRet(fs, args);
 			  }
 			  check_match(ls, ')', '(', line);
 			  break;
@@ -721,25 +721,25 @@ namespace KopiLua
 			}
 			case (int)RESERVED.TK_STRING: {  /* funcargs . STRING */
 			  codestring(ls, args, ls.t.seminfo.ts);
-			  luaX_next(ls);  /* must use `seminfo' before `next' */
+			  LuaXNext(ls);  /* must use `seminfo' before `next' */
 			  break;
 			}
 			default: {
-			  luaX_syntaxerror(ls, "function arguments expected");
+			  LuaXSyntaxError(ls, "function arguments expected");
 			  return;
 			}
 		  }
-		  lua_assert(f.k == expkind.VNONRELOC);
+		  LuaAssert(f.k == expkind.VNONRELOC);
 		  base_ = f.u.s.info;  /* base_ register for call */
 		  if (hasmultret(args.k) != 0)
 			nparams = LUA_MULTRET;  /* open call */
 		  else {
 			if (args.k != expkind.VVOID)
-			  luaK_exp2nextreg(fs, args);  /* close last argument */
+			  LuaKExp2NextReg(fs, args);  /* close last argument */
 			nparams = fs.freereg - (base_+1);
 		  }
-		  init_exp(f, expkind.VCALL, luaK_codeABC(fs, OpCode.OP_CALL, base_, nparams + 1, 2));
-		  luaK_fixline(fs, line);
+		  init_exp(f, expkind.VCALL, LuaKCodeABC(fs, OpCode.OP_CALL, base_, nparams + 1, 2));
+		  LuaKFixLine(fs, line);
 		  fs.freereg = base_+1;  /* call remove function and arguments and leaves
 									(unless changed) one result */
 		}
@@ -759,10 +759,10 @@ namespace KopiLua
 		  switch (ls.t.token) {
 			case '(': {
 			  int line = ls.linenumber;
-			  luaX_next(ls);
+			  LuaXNext(ls);
 			  expr(ls, v);
 			  check_match(ls, ')', '(', line);
-			  luaK_dischargevars(ls.fs, v);
+			  LuaKDischargeVars(ls.fs, v);
 			  return;
 			}
 			case (int)RESERVED.TK_NAME: {
@@ -770,7 +770,7 @@ namespace KopiLua
 			  return;
 			}
 			default: {
-			  luaX_syntaxerror(ls, "unexpected symbol");
+			  LuaXSyntaxError(ls, "unexpected symbol");
 			  return;
 			}
 		  }
@@ -789,21 +789,21 @@ namespace KopiLua
 			  }
 			  case '[': {  /* `[' exp1 `]' */
 				expdesc key = new expdesc();
-				luaK_exp2anyreg(fs, v);
+				LuaKExp2AnyReg(fs, v);
 				yindex(ls, key);
-				luaK_indexed(fs, v, key);
+				LuaKIndexed(fs, v, key);
 				break;
 			  }
 			  case ':': {  /* `:' NAME funcargs */
 				expdesc key = new expdesc();
-				luaX_next(ls);
+				LuaXNext(ls);
 				checkname(ls, key);
-				luaK_self(fs, v, key);
+				LuaKSelf(fs, v, key);
 				funcargs(ls, v);
 				break;
 			  }
 			  case '(': case (int)RESERVED.TK_STRING: case '{': {  /* funcargs */
-				luaK_exp2nextreg(fs, v);
+				LuaKExp2NextReg(fs, v);
 				funcargs(ls, v);
 				break;
 			  }
@@ -843,7 +843,7 @@ namespace KopiLua
 			  check_condition(ls, fs.f.is_vararg!=0,
 							  "cannot use " + LUA_QL("...") + " outside a vararg function");
 			  fs.f.is_vararg &= unchecked((lu_byte)(~VARARG_NEEDSARG));  /* don't need 'arg' */
-			  init_exp(v, expkind.VVARARG, luaK_codeABC(fs, OpCode.OP_VARARG, 0, 1, 0));
+			  init_exp(v, expkind.VVARARG, LuaKCodeABC(fs, OpCode.OP_VARARG, 0, 1, 0));
 			  break;
 			}
 			case '{': {  /* constructor */
@@ -851,7 +851,7 @@ namespace KopiLua
 			  return;
 			}
 			case (int)RESERVED.TK_FUNCTION: {
-			  luaX_next(ls);
+			  LuaXNext(ls);
 			  body(ls, v, 0, ls.linenumber);
 			  return;
 			}
@@ -860,7 +860,7 @@ namespace KopiLua
 			  return;
 			}
 		  }
-		  luaX_next(ls);
+		  LuaXNext(ls);
 		}
 
 
@@ -943,9 +943,9 @@ namespace KopiLua
 		  enterlevel(ls);
 		  uop = getunopr(ls.t.token);
 		  if (uop != UnOpr.OPR_NOUNOPR) {
-			luaX_next(ls);
+			LuaXNext(ls);
 			subexpr(ls, v, UNARY_PRIORITY);
-			luaK_prefix(ls.fs, uop, v);
+			LuaKPrefix(ls.fs, uop, v);
 		  }
 		  else simpleexp(ls, v);
 		  /* expand while operators have priorities higher than `limit' */
@@ -954,11 +954,11 @@ namespace KopiLua
 		  {
 			expdesc v2 = new expdesc();
 			BinOpr nextop;
-			luaX_next(ls);
-			luaK_infix(ls.fs, op, v);
+			LuaXNext(ls);
+			LuaKInfix(ls.fs, op, v);
 			/* read sub-expression with higher priority */
 			nextop = subexpr(ls, v2, priority[(int)op].right);
-			luaK_posfix(ls.fs, op, v, v2);
+			LuaKPosFix(ls.fs, op, v, v2);
 			op = nextop;
 		  }
 		  leavelevel(ls);
@@ -997,7 +997,7 @@ namespace KopiLua
 		  BlockCnt bl = new BlockCnt();
 		  enterblock(fs, bl, 0);
 		  chunk(ls);
-		  lua_assert(bl.breaklist == NO_JUMP);
+		  LuaAssert(bl.breaklist == NO_JUMP);
 		  leaveblock(fs);
 		}
 
@@ -1035,8 +1035,8 @@ namespace KopiLua
 			}
 		  }
 		  if (conflict != 0) {
-			luaK_codeABC(fs, OpCode.OP_MOVE, fs.freereg, v.u.s.info, 0);  /* make copy */
-			luaK_reserveregs(fs, 1);
+			LuaKCodeABC(fs, OpCode.OP_MOVE, fs.freereg, v.u.s.info, 0);  /* make copy */
+			LuaKReserveRegs(fs, 1);
 		  }
 		}
 
@@ -1065,13 +1065,13 @@ namespace KopiLua
 				ls.fs.freereg -= nexps - nvars;  /* remove extra values */
 			}
 			else {
-			  luaK_setoneret(ls.fs, e);  /* close last expression */
-			  luaK_storevar(ls.fs, lh.v, e);
+			  LuaKSetOneRet(ls.fs, e);  /* close last expression */
+			  LuaKStoreVar(ls.fs, lh.v, e);
 			  return;  /* avoid default */
 			}
 		  }
 		  init_exp(e, expkind.VNONRELOC, ls.fs.freereg - 1);  /* default assignment */
-		  luaK_storevar(ls.fs, lh.v, e);
+		  LuaKStoreVar(ls.fs, lh.v, e);
 		}
 
 
@@ -1080,7 +1080,7 @@ namespace KopiLua
 		  expdesc v = new expdesc();
 		  expr(ls, v);  /* read condition */
 		  if (v.k == expkind.VNIL) v.k = expkind.VFALSE;  /* `falses' are all equal here */
-		  luaK_goiftrue(ls.fs, v);
+		  LuaKGoIfTrue(ls.fs, v);
 		  return v.f;
 		}
 
@@ -1094,10 +1094,10 @@ namespace KopiLua
 			bl = bl.previous;
 		  }
 		  if (bl==null)
-			luaX_syntaxerror(ls, "no loop to break");
+			LuaXSyntaxError(ls, "no loop to break");
 		  if (upval != 0)
-			luaK_codeABC(fs, OpCode.OP_CLOSE, bl.nactvar, 0, 0);
-		  luaK_concat(fs, ref bl.breaklist, luaK_jump(fs));
+			LuaKCodeABC(fs, OpCode.OP_CLOSE, bl.nactvar, 0, 0);
+		  LuaKConcat(fs, ref bl.breaklist, LuaKJump(fs));
 		}
 
 
@@ -1107,16 +1107,16 @@ namespace KopiLua
 		  int whileinit;
 		  int condexit;
 		  BlockCnt bl = new BlockCnt();
-		  luaX_next(ls);  /* skip WHILE */
-		  whileinit = luaK_getlabel(fs);
+		  LuaXNext(ls);  /* skip WHILE */
+		  whileinit = LuaKGetLabel(fs);
 		  condexit = cond(ls);
 		  enterblock(fs, bl, 1);
 		  checknext(ls, (int)RESERVED.TK_DO);
 		  block(ls);
-		  luaK_patchlist(fs, luaK_jump(fs), whileinit);
+		  LuaKPatchList(fs, LuaKJump(fs), whileinit);
 		  check_match(ls, (int)RESERVED.TK_END, (int)RESERVED.TK_WHILE, line);
 		  leaveblock(fs);
-		  luaK_patchtohere(fs, condexit);  /* false conditions finish the loop */
+		  LuaKPatchToHere(fs, condexit);  /* false conditions finish the loop */
 		}
 
 
@@ -1124,23 +1124,23 @@ namespace KopiLua
 		  /* repeatstat . REPEAT block UNTIL cond */
 		  int condexit;
 		  FuncState fs = ls.fs;
-		  int repeat_init = luaK_getlabel(fs);
+		  int repeat_init = LuaKGetLabel(fs);
 		  BlockCnt bl1 = new BlockCnt(), bl2 = new BlockCnt();
 		  enterblock(fs, bl1, 1);  /* loop block */
 		  enterblock(fs, bl2, 0);  /* scope block */
-		  luaX_next(ls);  /* skip REPEAT */
+		  LuaXNext(ls);  /* skip REPEAT */
 		  chunk(ls);
 		  check_match(ls, (int)RESERVED.TK_UNTIL, (int)RESERVED.TK_REPEAT, line);
 		  condexit = cond(ls);  /* read condition (inside scope block) */
 		  if (bl2.upval==0) {  /* no upvalues? */
 			leaveblock(fs);  /* finish scope */
-			luaK_patchlist(ls.fs, condexit, repeat_init);  /* close the loop */
+			LuaKPatchList(ls.fs, condexit, repeat_init);  /* close the loop */
 		  }
 		  else {  /* complete semantics when there are upvalues */
 			breakstat(ls);  /* if condition then break */
-			luaK_patchtohere(ls.fs, condexit);  /* else... */
+			LuaKPatchToHere(ls.fs, condexit);  /* else... */
 			leaveblock(fs);  /* finish scope... */
-			luaK_patchlist(ls.fs, luaK_jump(fs), repeat_init);  /* and repeat */
+			LuaKPatchList(ls.fs, LuaKJump(fs), repeat_init);  /* and repeat */
 		  }
 		  leaveblock(fs);  /* finish loop */
 		}
@@ -1151,7 +1151,7 @@ namespace KopiLua
 		  int k;
 		  expr(ls, e);
 		  k = (int)e.k;
-		  luaK_exp2nextreg(ls.fs, e);
+		  LuaKExp2NextReg(ls.fs, e);
 		  return k;
 		}
 
@@ -1163,17 +1163,17 @@ namespace KopiLua
 		  int prep, endfor;
 		  adjustlocalvars(ls, 3);  /* control variables */
 		  checknext(ls, (int)RESERVED.TK_DO);
-		  prep = (isnum != 0) ? luaK_codeAsBx(fs, OpCode.OP_FORPREP, base_, NO_JUMP) : luaK_jump(fs);
+		  prep = (isnum != 0) ? LuaKCodeAsBx(fs, OpCode.OP_FORPREP, base_, NO_JUMP) : LuaKJump(fs);
 		  enterblock(fs, bl, 0);  /* scope for declared variables */
 		  adjustlocalvars(ls, nvars);
-		  luaK_reserveregs(fs, nvars);
+		  LuaKReserveRegs(fs, nvars);
 		  block(ls);
 		  leaveblock(fs);  /* end of scope for declared variables */
-		  luaK_patchtohere(fs, prep);
-		  endfor = (isnum!=0) ? luaK_codeAsBx(fs, OpCode.OP_FORLOOP, base_, NO_JUMP) :
-							 luaK_codeABC(fs, OpCode.OP_TFORLOOP, base_, 0, nvars);
-		  luaK_fixline(fs, line);  /* pretend that `OP_FOR' starts the loop */
-		  luaK_patchlist(fs, ((isnum!=0) ? endfor : luaK_jump(fs)), prep + 1);
+		  LuaKPatchToHere(fs, prep);
+		  endfor = (isnum!=0) ? LuaKCodeAsBx(fs, OpCode.OP_FORLOOP, base_, NO_JUMP) :
+							 LuaKCodeABC(fs, OpCode.OP_TFORLOOP, base_, 0, nvars);
+		  LuaKFixLine(fs, line);  /* pretend that `OP_FOR' starts the loop */
+		  LuaKPatchList(fs, ((isnum!=0) ? endfor : LuaKJump(fs)), prep + 1);
 		}
 
 
@@ -1192,8 +1192,8 @@ namespace KopiLua
 		  if (testnext(ls, ',') != 0)
 			exp1(ls);  /* optional step */
 		  else {  /* default step = 1 */
-			luaK_codeABx(fs, OpCode.OP_LOADK, fs.freereg, luaK_numberK(fs, 1));
-			luaK_reserveregs(fs, 1);
+			LuaKCodeABx(fs, OpCode.OP_LOADK, fs.freereg, LuaKNumberK(fs, 1));
+			LuaKReserveRegs(fs, 1);
 		  }
 		  forbody(ls, base_, line, 1, 1);
 		}
@@ -1217,7 +1217,7 @@ namespace KopiLua
 		  checknext(ls, (int)RESERVED.TK_IN);
 		  line = ls.linenumber;
 		  adjust_assign(ls, 3, explist1(ls, e), e);
-		  luaK_checkstack(fs, 3);  /* extra space to call generator */
+		  LuaKCheckStack(fs, 3);  /* extra space to call generator */
 		  forbody(ls, base_, line, nvars - 3, 0);
 		}
 
@@ -1228,7 +1228,7 @@ namespace KopiLua
 		  TString varname;
 		  BlockCnt bl = new BlockCnt();
 		  enterblock(fs, bl, 1);  /* scope for loop and control variables */
-		  luaX_next(ls);  /* skip `for' */
+		  LuaXNext(ls);  /* skip `for' */
 		  varname = str_checkname(ls);  /* first variable name */
 		  switch (ls.t.token) {
 			case '=': fornum(ls, varname, line); break;
@@ -1236,7 +1236,7 @@ namespace KopiLua
 			case (int)RESERVED.TK_IN:
 				forlist(ls, varname);
 				break;
-			default: luaX_syntaxerror(ls, LUA_QL("=") + " or " + LUA_QL("in") + " expected"); break;
+			default: LuaXSyntaxError(ls, LUA_QL("=") + " or " + LUA_QL("in") + " expected"); break;
 		  }
 		  check_match(ls, (int)RESERVED.TK_END, (int)RESERVED.TK_FOR, line);
 		  leaveblock(fs);  /* loop scope (`break' jumps to this point) */
@@ -1246,7 +1246,7 @@ namespace KopiLua
 		private static int test_then_block (LexState ls) {
 		  /* test_then_block . [IF | ELSEIF] cond THEN block */
 		  int condexit;
-		  luaX_next(ls);  /* skip IF or ELSEIF */
+		  LuaXNext(ls);  /* skip IF or ELSEIF */
 		  condexit = cond(ls);
 		  checknext(ls, (int)RESERVED.TK_THEN);
 		  block(ls);  /* `then' part */
@@ -1261,19 +1261,19 @@ namespace KopiLua
 		  int escapelist = NO_JUMP;
 		  flist = test_then_block(ls);  /* IF cond THEN block */
 		  while (ls.t.token == (int)RESERVED.TK_ELSEIF) {
-			luaK_concat(fs, ref escapelist, luaK_jump(fs));
-			luaK_patchtohere(fs, flist);
+			LuaKConcat(fs, ref escapelist, LuaKJump(fs));
+			LuaKPatchToHere(fs, flist);
 			flist = test_then_block(ls);  /* ELSEIF cond THEN block */
 		  }
 		  if (ls.t.token == (int)RESERVED.TK_ELSE) {
-			luaK_concat(fs, ref escapelist, luaK_jump(fs));
-			luaK_patchtohere(fs, flist);
-			luaX_next(ls);  /* skip ELSE (after patch, for correct line info) */
+			LuaKConcat(fs, ref escapelist, LuaKJump(fs));
+			LuaKPatchToHere(fs, flist);
+			LuaXNext(ls);  /* skip ELSE (after patch, for correct line info) */
 			block(ls);  /* `else' part */
 		  }
 		  else
-			luaK_concat(fs, ref escapelist, flist);
-		  luaK_patchtohere(fs, escapelist);
+			LuaKConcat(fs, ref escapelist, flist);
+		  LuaKPatchToHere(fs, escapelist);
 		  check_match(ls, (int)RESERVED.TK_END, (int)RESERVED.TK_IF, line);
 		}
 
@@ -1283,10 +1283,10 @@ namespace KopiLua
 		  FuncState fs = ls.fs;
 		  new_localvar(ls, str_checkname(ls), 0);
 		  init_exp(v, expkind.VLOCAL, fs.freereg);
-		  luaK_reserveregs(fs, 1);
+		  LuaKReserveRegs(fs, 1);
 		  adjustlocalvars(ls, 1);
 		  body(ls, b, 0, ls.linenumber);
-		  luaK_storevar(fs, v, b);
+		  LuaKStoreVar(fs, v, b);
 		  /* debug information will only see the variable after this point! */
 		  getlocvar(fs, fs.nactvar - 1).startpc = fs.pc;
 		}
@@ -1329,11 +1329,11 @@ namespace KopiLua
 		  /* funcstat . FUNCTION funcname body */
 		  int needself;
 		  expdesc v = new expdesc(), b = new expdesc();
-		  luaX_next(ls);  /* skip FUNCTION */
+		  LuaXNext(ls);  /* skip FUNCTION */
 		  needself = funcname(ls, v);
 		  body(ls, b, needself, line);
-		  luaK_storevar(ls.fs, v, b);
-		  luaK_fixline(ls.fs, line);  /* definition `happens' in the first line */
+		  LuaKStoreVar(ls.fs, v, b);
+		  LuaKFixLine(ls.fs, line);  /* definition `happens' in the first line */
 		}
 
 
@@ -1343,7 +1343,7 @@ namespace KopiLua
 		  LHS_assign v = new LHS_assign();
 		  primaryexp(ls, v.v);
 		  if (v.v.k == expkind.VCALL)  /* stat . func */
-			SETARG_C(getcode(fs, v.v), 1);  /* call statement uses no results */
+			SETARG_C(GetCode(fs, v.v), 1);  /* call statement uses no results */
 		  else {  /* stat . assignment */
 			v.prev = null;
 			assignment(ls, v, 1);
@@ -1356,31 +1356,31 @@ namespace KopiLua
 		  FuncState fs = ls.fs;
 		  expdesc e = new expdesc();
 		  int first, nret;  /* registers with returned values */
-		  luaX_next(ls);  /* skip RETURN */
+		  LuaXNext(ls);  /* skip RETURN */
 		  if ((block_follow(ls.t.token)!=0) || ls.t.token == ';')
 			first = nret = 0;  /* return no values */
 		  else {
 			nret = explist1(ls, e);  /* optional return values */
 			if (hasmultret(e.k) != 0) {
-			  luaK_setmultret(fs, e);
+			  LuaKSetMultRet(fs, e);
 			  if (e.k == expkind.VCALL && nret == 1) {  /* tail call? */
-				SET_OPCODE(getcode(fs,e), OpCode.OP_TAILCALL);
-				lua_assert(GETARG_A(getcode(fs,e)) == fs.nactvar);
+				SET_OPCODE(GetCode(fs,e), OpCode.OP_TAILCALL);
+				LuaAssert(GETARG_A(GetCode(fs,e)) == fs.nactvar);
 			  }
 			  first = fs.nactvar;
 			  nret = LUA_MULTRET;  /* return all values */
 			}
 			else {
 			  if (nret == 1)  /* only one single value? */
-				first = luaK_exp2anyreg(fs, e);
+				first = LuaKExp2AnyReg(fs, e);
 			  else {
-				luaK_exp2nextreg(fs, e);  /* values must go to the `stack' */
+				LuaKExp2NextReg(fs, e);  /* values must go to the `stack' */
 				first = fs.nactvar;  /* return all `active' values */
-				lua_assert(nret == fs.freereg - first);
+				LuaAssert(nret == fs.freereg - first);
 			  }
 			}
 		  }
-		  luaK_ret(fs, first, nret);
+		  LuaKRet(fs, first, nret);
 		}
 
 
@@ -1396,7 +1396,7 @@ namespace KopiLua
 			  return 0;
 			}
 			case (int)RESERVED.TK_DO: {  /* stat . DO block END */
-			  luaX_next(ls);  /* skip DO */
+			  LuaXNext(ls);  /* skip DO */
 			  block(ls);
 			  check_match(ls, (int)RESERVED.TK_END, (int)RESERVED.TK_DO, line);
 			  return 0;
@@ -1414,7 +1414,7 @@ namespace KopiLua
 			  return 0;
 			}
 			case (int)RESERVED.TK_LOCAL: {  /* stat . localstat */
-			  luaX_next(ls);  /* skip LOCAL */
+			  LuaXNext(ls);  /* skip LOCAL */
 			  if (testnext(ls, (int)RESERVED.TK_FUNCTION) != 0)  /* local function? */
 				localfunc(ls);
 			  else
@@ -1426,7 +1426,7 @@ namespace KopiLua
 			  return 1;  /* must be last statement */
 			}
 			case (int)RESERVED.TK_BREAK: {  /* stat . breakstat */
-			  luaX_next(ls);  /* skip BREAK */
+			  LuaXNext(ls);  /* skip BREAK */
 			  breakstat(ls);
 			  return 1;  /* must be last statement */
 			}
@@ -1445,7 +1445,7 @@ namespace KopiLua
 		  while ((islast==0) && (block_follow(ls.t.token)==0)) {
 			islast = statement(ls);
 			testnext(ls, ';');
-			lua_assert(ls.fs.f.maxstacksize >= ls.fs.freereg &&
+			LuaAssert(ls.fs.f.maxstacksize >= ls.fs.freereg &&
 					   ls.fs.freereg >= ls.fs.nactvar);
 			ls.fs.freereg = ls.fs.nactvar;  /* free registers */
 		  }

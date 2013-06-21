@@ -17,9 +17,9 @@ namespace KopiLua
 	{
 		public const string MEMERRMSG	= "not enough memory";
 
-		public static T[] luaM_reallocv<T>(lua_State L, T[] block, int new_size)
+		public static T[] LuaMReallocV<T>(LuaState L, T[] block, int new_size)
 		{
-			return (T[])luaM_realloc_(L, block, new_size);
+			return (T[])LuaMRealloc(L, block, new_size);
 		}
 			
 		//#define luaM_freemem(L, b, s)	luaM_realloc_(L, (b), (s), 0)
@@ -27,27 +27,27 @@ namespace KopiLua
 		//public static void luaM_freearray(lua_State L, object b, int n, Type t) { luaM_reallocv(L, b, n, 0, Marshal.SizeOf(b)); }
 
 		// C# has it's own gc, so nothing to do here...in theory...
-		public static void luaM_freemem<T>(lua_State L, T b) { luaM_realloc_<T>(L, new T[] {b}, 0); }
-		public static void luaM_free<T>(lua_State L, T b) { luaM_realloc_<T>(L, new T[] {b}, 0); }
-		public static void luaM_freearray<T>(lua_State L, T[] b) { luaM_reallocv(L, b, 0); }
+		public static void LuaMFreeMem<T>(LuaState L, T b) { LuaMRealloc<T>(L, new T[] {b}, 0); }
+		public static void LuaMFree<T>(LuaState L, T b) { LuaMRealloc<T>(L, new T[] {b}, 0); }
+		public static void LuaMFreeArray<T>(LuaState L, T[] b) { LuaMReallocV(L, b, 0); }
 
-		public static T luaM_malloc<T>(lua_State L) { return (T)luaM_realloc_<T>(L); }
-		public static T luaM_new<T>(lua_State L) { return (T)luaM_realloc_<T>(L); }
-		public static T[] luaM_newvector<T>(lua_State L, int n)
+		public static T LuaMMalloc<T>(LuaState L) { return (T)LuaMRealloc<T>(L); }
+		public static T LuaMNew<T>(LuaState L) { return (T)LuaMRealloc<T>(L); }
+		public static T[] LuaMNewVector<T>(LuaState L, int n)
 		{
-			return luaM_reallocv<T>(L, null, n);
+			return LuaMReallocV<T>(L, null, n);
 		}
 
-		public static void luaM_growvector<T>(lua_State L, ref T[] v, int nelems, ref int size, int limit, CharPtr e)
+		public static void LuaMGrowVector<T>(LuaState L, ref T[] v, int nelems, ref int size, int limit, CharPtr e)
 		{
 			if (nelems + 1 > size)
-				v = (T[])luaM_growaux_(L, ref v, ref size, limit, e);
+				v = (T[])LuaMGrowAux(L, ref v, ref size, limit, e);
 		}
 
-		public static T[] luaM_reallocvector<T>(lua_State L, ref T[] v, int oldn, int n)
+		public static T[] LuaMReallocVector<T>(LuaState L, ref T[] v, int oldn, int n)
 		{
 			Debug.Assert((v == null && oldn == 0) || (v.Length == oldn));
-			v = luaM_reallocv<T>(L, v, n);
+			v = LuaMReallocV<T>(L, v, n);
 			return v;
 		}
 
@@ -75,7 +75,7 @@ namespace KopiLua
 		public const int MINSIZEARRAY	= 4;
 
 
-		public static T[] luaM_growaux_<T>(lua_State L, ref T[] block, ref int size,
+		public static T[] LuaMGrowAux<T>(LuaState L, ref T[] block, ref int size,
 							 int limit, CharPtr errormsg)
 		{
 			T[] newblock;
@@ -83,7 +83,7 @@ namespace KopiLua
 			if (size >= limit / 2)
 			{  /* cannot double it? */
 				if (size >= limit)  /* cannot grow even a little? */
-					luaG_runerror(L, errormsg);
+					LuaGRunError(L, errormsg);
 				newsize = limit;  /* still have at least one free place */
 			}
 			else
@@ -92,14 +92,14 @@ namespace KopiLua
 				if (newsize < MINSIZEARRAY)
 					newsize = MINSIZEARRAY;  /* minimum size */
 			}
-			newblock = luaM_reallocv<T>(L, block, newsize);
+			newblock = LuaMReallocV<T>(L, block, newsize);
 			size = newsize;  /* update only when everything else is OK */
 			return newblock;
 		}
 
 
-		public static object luaM_toobig (lua_State L) {
-		  luaG_runerror(L, "memory allocation error: block too big");
+		public static object LuaMTooBig (LuaState L) {
+		  LuaGRunError(L, "memory allocation error: block too big");
 		  return null;  /* to avoid warnings */
 		}
 
@@ -109,7 +109,7 @@ namespace KopiLua
 		** generic allocation routine.
 		*/
 
-		public static object luaM_realloc_(lua_State L, Type t)
+		public static object LuaMRealloc(LuaState L, Type t)
 		{
 			int unmanaged_size = (int)GetUnmanagedSize(t);
 			int nsize = unmanaged_size;
@@ -118,7 +118,7 @@ namespace KopiLua
 			return new_obj;
 		}
 
-		public static object luaM_realloc_<T>(lua_State L)
+		public static object LuaMRealloc<T>(LuaState L)
 		{
 			int unmanaged_size = (int)GetUnmanagedSize(typeof(T));
 			int nsize = unmanaged_size;
@@ -127,7 +127,7 @@ namespace KopiLua
 			return new_obj;
 		}
 
-		public static object luaM_realloc_<T>(lua_State L, T obj)
+		public static object LuaMRealloc<T>(LuaState L, T obj)
 		{
 			int unmanaged_size = (int)GetUnmanagedSize(typeof(T));
 			int old_size = (obj == null) ? 0 : unmanaged_size;
@@ -139,7 +139,7 @@ namespace KopiLua
 			return new_obj;
 		}
 
-		public static object luaM_realloc_<T>(lua_State L, T[] old_block, int new_size)
+		public static object LuaMRealloc<T>(LuaState L, T[] old_block, int new_size)
 		{
 			int unmanaged_size = (int)GetUnmanagedSize(typeof(T));
 			int old_size = (old_block == null) ? 0 : old_block.Length;
@@ -155,8 +155,8 @@ namespace KopiLua
 				{
 					ArrayElement elem = new_block[i] as ArrayElement;
 					Debug.Assert(elem != null, String.Format("Need to derive type {0} from ArrayElement", typeof(T).ToString()));
-					elem.set_index(i);
-					elem.set_array(new_block);
+					elem.SetIndex(i);
+					elem.SetArray(new_block);
 				}
 			SubtractTotalBytes(L, osize);
 			AddTotalBytes(L, nsize);
@@ -178,10 +178,10 @@ namespace KopiLua
 			return true;
 		}
 
-		static void AddTotalBytes(lua_State L, int num_bytes) { G(L).totalbytes += (uint)num_bytes; }
-		static void SubtractTotalBytes(lua_State L, int num_bytes) { G(L).totalbytes -= (uint)num_bytes; }
+		static void AddTotalBytes(LuaState L, int num_bytes) { G(L).totalbytes += (uint)num_bytes; }
+		static void SubtractTotalBytes(LuaState L, int num_bytes) { G(L).totalbytes -= (uint)num_bytes; }
 
-		static void AddTotalBytes(lua_State L, uint num_bytes) {G(L).totalbytes += num_bytes;}
-		static void SubtractTotalBytes(lua_State L, uint num_bytes) {G(L).totalbytes -= num_bytes;}
+		static void AddTotalBytes(LuaState L, uint num_bytes) {G(L).totalbytes += num_bytes;}
+		static void SubtractTotalBytes(LuaState L, uint num_bytes) {G(L).totalbytes -= num_bytes;}
 	}
 }

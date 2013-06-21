@@ -41,7 +41,7 @@ namespace KopiLua
 		  public uint buffsize;
 		};
 
-		public static void luaZ_initbuffer(lua_State L, Mbuffer buff)
+		public static void luaZ_initbuffer(LuaState L, Mbuffer buff)
 		{
 			buff.buffer = null;
 		}
@@ -54,15 +54,15 @@ namespace KopiLua
 		public static void luaZ_resetbuffer(Mbuffer buff) {buff.n = 0;}
 
 
-		public static void luaZ_resizebuffer(lua_State L, Mbuffer buff, int size)
+		public static void luaZ_resizebuffer(LuaState L, Mbuffer buff, int size)
 		{
 			if (buff.buffer == null)
 				buff.buffer = new CharPtr();
-			luaM_reallocvector(L, ref buff.buffer.chars, (int)buff.buffsize, size);
+			LuaMReallocVector(L, ref buff.buffer.chars, (int)buff.buffsize, size);
 			buff.buffsize = (uint)buff.buffer.chars.Length;
 		}
 
-		public static void luaZ_freebuffer(lua_State L, Mbuffer buff) {luaZ_resizebuffer(L, buff, 0);}
+		public static void luaZ_freebuffer(LuaState L, Mbuffer buff) {luaZ_resizebuffer(L, buff, 0);}
 
 
 
@@ -75,17 +75,17 @@ namespace KopiLua
 			[CLSCompliantAttribute(false)]
 			public lua_Reader reader;
 			public object data;			/* additional data */
-			public lua_State L;			/* Lua state (for reader) */
+			public LuaState L;			/* Lua state (for reader) */
 		};
 
 
 		public static int luaZ_fill (ZIO z) {
 		  uint size;
-		  lua_State L = z.L;
+		  LuaState L = z.L;
 		  CharPtr buff;
-		  lua_unlock(L);
+		  LuaUnlock(L);
 		  buff = z.reader(L, z.data, out size);
-		  lua_lock(L);
+		  LuaLock(L);
 		  if (buff == null || size == 0) return EOZ;
 		  z.n = size - 1;
 		  z.p = new CharPtr(buff);
@@ -108,7 +108,7 @@ namespace KopiLua
 		}
 
 		[CLSCompliantAttribute(false)]
-		public static void luaZ_init(lua_State L, ZIO z, lua_Reader reader, object data)
+		public static void luaZ_init(LuaState L, ZIO z, lua_Reader reader, object data)
 		{
 		  z.L = L;
 		  z.reader = reader;
@@ -138,9 +138,9 @@ namespace KopiLua
 
 		/* ------------------------------------------------------------------------ */
 		[CLSCompliantAttribute(false)]
-		public static CharPtr luaZ_openspace (lua_State L, Mbuffer buff, uint n) {
+		public static CharPtr luaZ_openspace (LuaState L, Mbuffer buff, uint n) {
 		  if (n > buff.buffsize) {
-			if (n < LUA_MINBUFFER) n = LUA_MINBUFFER;
+			if (n < LUAMINBUFFER) n = LUAMINBUFFER;
 			luaZ_resizebuffer(L, buff, (int)n);
 		  }
 		  return buff.buffer;

@@ -10,7 +10,7 @@ using System.Text;
 
 namespace KopiLua
 {
-	using TValue = Lua.lua_TValue;
+	using TValue = Lua.LuaTypeValue;
 
 	public partial class Lua
 	{
@@ -39,14 +39,14 @@ namespace KopiLua
 		  TM_N		/* number of elements in the enum */
 		};
 
-		public static TValue gfasttm(global_State g, Table et, TMS e)
+		public static TValue gfasttm(GlobalState g, Table et, TMS e)
 		{
 			return (et == null) ? null : 
 			((et.flags & (1 << (int)e)) != 0) ? null :
 			luaT_gettm(et, e, g.tmname[(int)e]);
 		}
 
-		public static TValue fasttm(lua_State l, Table et, TMS e)	{return gfasttm(G(l), et, e);}
+		public static TValue fasttm(LuaState l, Table et, TMS e)	{return gfasttm(G(l), et, e);}
 
 		public readonly static CharPtr[] luaT_typenames = {
 		  "nil", "boolean", "userdata", "number",
@@ -62,7 +62,7 @@ namespace KopiLua
 			"__concat", "__call"
 		  };
 
-		public static void luaT_init (lua_State L) {
+		public static void luaT_init (LuaState L) {
 		  int i;
 		  for (i=0; i<(int)TMS.TM_N; i++) {
 			G(L).tmname[i] = luaS_new(L, luaT_eventname[i]);
@@ -77,8 +77,8 @@ namespace KopiLua
 		*/
 		public static TValue luaT_gettm (Table events, TMS event_, TString ename) {
 		  /*const*/ TValue tm = luaH_getstr(events, ename);
-		  lua_assert(event_ <= TMS.TM_EQ);
-		  if (ttisnil(tm)) {  /* no tag method? */
+		  LuaAssert(event_ <= TMS.TM_EQ);
+		  if (TTIsNil(tm)) {  /* no tag method? */
 			events.flags |= (byte)(1<<(int)event_);  /* cache this fact */
 			return null;
 		  }
@@ -86,21 +86,21 @@ namespace KopiLua
 		}
 
 
-		public static TValue luaT_gettmbyobj (lua_State L, TValue o, TMS event_) {
+		public static TValue luaT_gettmbyobj (LuaState L, TValue o, TMS event_) {
 		  Table mt;
-		  switch (ttype(o)) {
+		  switch (TType(o)) {
 			case LUA_TTABLE:
-			  mt = hvalue(o).metatable;
+			  mt = HValue(o).metatable;
 			  break;
 			case LUA_TUSERDATA:
-			  mt = uvalue(o).metatable;
+			  mt = UValue(o).metatable;
 			  break;
 			default:
-			  mt = G(L).mt[ttype(o)];
+			  mt = G(L).mt[TType(o)];
 			  break;
 		  }
 
-		  return ((mt!=null) ? luaH_getstr(mt, G(L).tmname[(int)event_]) : luaO_nilobject);
+		  return ((mt!=null) ? luaH_getstr(mt, G(L).tmname[(int)event_]) : LuaONilObject);
 		}
 	}
 }

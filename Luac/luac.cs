@@ -127,23 +127,23 @@ namespace KopiLua
 		 return i;
 		}
 
-		static Lua.Proto toproto(Lua.lua_State L, int i) {return Lua.clvalue(L.top+(i)).l.p;}
+		static Lua.Proto toproto(Lua.LuaState L, int i) {return Lua.CLValue(L.top+(i)).l.p;}
 
-		static Lua.Proto combine(Lua.lua_State L, int n)
+		static Lua.Proto combine(Lua.LuaState L, int n)
 		{
 		 if (n==1)
 		  return toproto(L,-1);
 		 else
 		 {
 		  int i,pc;
-		  Lua.Proto f=Lua.luaF_newproto(L);
-		  Lua.setptvalue2s(L,L.top,f); Lua.incr_top(L);
+		  Lua.Proto f=Lua.LuaFNewProto(L);
+		  Lua.SetPTValue2S(L,L.top,f); Lua.IncrTop(L);
 		  f.source=Lua.luaS_newliteral(L,"=(" + PROGNAME + ")");
 		  f.maxstacksize=1;
 		  pc=2*n+1;
-		  f.code = (Instruction[])Lua.luaM_newvector<Instruction>(L, pc);
+		  f.code = (Instruction[])Lua.LuaMNewVector<Instruction>(L, pc);
 		  f.sizecode=pc;
-		  f.p = Lua.luaM_newvector<Lua.Proto>(L, n);
+		  f.p = Lua.LuaMNewVector<Lua.Proto>(L, n);
 		  f.sizep=n;
 		  pc=0;
 		  for (i=0; i<n; i++)
@@ -157,7 +157,7 @@ namespace KopiLua
 		 }
 		}
 
-		static int writer(Lua.lua_State L, Lua.CharPtr p, uint size, object u)
+		static int writer(Lua.LuaState L, Lua.CharPtr p, uint size, object u)
 		{
 		 //UNUSED(L);
 		 return ((Lua.fwrite(p,(int)size,1,(Stream)u)!=1) && (size!=0)) ? 1 : 0;
@@ -168,18 +168,18 @@ namespace KopiLua
 		 public string[] argv;
 		};
 
-		static int pmain(Lua.lua_State L)
+		static int pmain(Lua.LuaState L)
 		{
-		 Smain s = (Smain)Lua.lua_touserdata(L, 1);
+		 Smain s = (Smain)Lua.LuaToUserData(L, 1);
 		 int argc=s.argc;
 		 string[] argv=s.argv;
 		 Lua.Proto f;
 		 int i;
-		 if (Lua.lua_checkstack(L,argc)==0) fatal("too many input files");
+		 if (Lua.LuaCheckStack(L,argc)==0) fatal("too many input files");
 		 for (i=0; i<argc; i++)
 		 {
 		  Lua.CharPtr filename=(Lua.strcmp(argv[i], "-")==0) ? null : argv[i];
-		  if (Lua.luaL_loadfile(L,filename)!=0) fatal(Lua.lua_tostring(L,-1));
+		  if (Lua.LuaLLoadFile(L,filename)!=0) fatal(Lua.LuaToString(L,-1));
 		 }
 		 f=combine(L,argc);
 		 if (listing!=0) Lua.luaU_print(f,(listing>1)?1:0);
@@ -187,9 +187,9 @@ namespace KopiLua
 		 {
 		  Stream D= (output==null) ? Lua.stdout : Lua.fopen(output,"wb");
 		  if (D==null) cannot("open");
-		  Lua.lua_lock(L);
-		  Lua.luaU_dump(L,f,writer,D,stripping);
-		  Lua.lua_unlock(L);
+		  Lua.LuaLock(L);
+		  Lua.LuaUDump(L,f,writer,D,stripping);
+		  Lua.LuaUnlock(L);
 		  if (Lua.ferror(D)!=0) cannot("write");
 		  if (Lua.fclose(D)!=0) cannot("close");
 		 }
@@ -205,19 +205,19 @@ namespace KopiLua
 		 newargs.Insert(0, Assembly.GetExecutingAssembly().Location);
 		 args = (string[])newargs.ToArray();
 
-		 Lua.lua_State L;
+		 Lua.LuaState L;
 		 Smain s = new Smain();
 		 int argc = args.Length;
 		 int i=doargs(argc,args);
 		 newargs.RemoveRange(0, i);
 		 argc -= i; args = (string[])newargs.ToArray();
 		 if (argc<=0) usage("no input files given");
-		 L=Lua.lua_open();
+		 L=Lua.LuaOpen();
 		 if (L==null) fatal("not enough memory for state");
 		 s.argc=argc;
 		 s.argv=args;
-		 if (Lua.lua_cpcall(L,pmain,s)!=0) fatal(Lua.lua_tostring(L,-1));
-		 Lua.lua_close(L);
+		 if (Lua.LuaCPCall(L,pmain,s)!=0) fatal(Lua.LuaToString(L,-1));
+		 Lua.LuaClose(L);
 		 return Lua.EXIT_SUCCESS;
 		}
 		

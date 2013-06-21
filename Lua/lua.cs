@@ -26,16 +26,16 @@ namespace KopiLua
 
 
 
-		static Lua.lua_State globalL = null;
+		static Lua.LuaState globalL = null;
 
 		static Lua.CharPtr progname = Lua.LUA_PROGNAME;
 
 
 
-		static void lstop(Lua.lua_State L, Lua.lua_Debug ar)
+		static void lstop(Lua.LuaState L, Lua.LuaDebug ar)
 		{
-			Lua.lua_sethook(L, null, 0, 0);
-			Lua.luaL_error(L, "interrupted!");
+			Lua.LuaSetHook(L, null, 0, 0);
+			Lua.LuaLError(L, "interrupted!");
 		}
 
 
@@ -43,7 +43,7 @@ namespace KopiLua
 		{
 			//signal(i, SIG_DFL); /* if another SIGINT happens before lstop,
 			//						  terminate process (default action) */
-			Lua.lua_sethook(globalL, lstop, Lua.LUA_MASKCALL | Lua.LUA_MASKRET | Lua.LUA_MASKCOUNT, 1);
+			Lua.LuaSetHook(globalL, lstop, Lua.LUA_MASKCALL | Lua.LUA_MASKRET | Lua.LUA_MASKCOUNT, 1);
 		}
 
 
@@ -72,54 +72,54 @@ namespace KopiLua
 		}
 
 
-		static int report(Lua.lua_State L, int status)
+		static int report(Lua.LuaState L, int status)
 		{
-			if ((status!=0) && !Lua.lua_isnil(L, -1))
+			if ((status!=0) && !Lua.LuaIsNil(L, -1))
 			{
-				Lua.CharPtr msg = Lua.lua_tostring(L, -1);
+				Lua.CharPtr msg = Lua.LuaToString(L, -1);
 				if (msg == null) msg = "(error object is not a string)";
 				l_message(progname, msg);
-				Lua.lua_pop(L, 1);
+				Lua.LuaPop(L, 1);
 			}
 			return status;
 		}
 
 
-		static int traceback(Lua.lua_State L)
+		static int traceback(Lua.LuaState L)
 		{
-			if (Lua.lua_isstring(L, 1)==0)  /* 'message' not a string? */
+			if (Lua.LuaIsString(L, 1)==0)  /* 'message' not a string? */
 				return 1;  /* keep it intact */
-			Lua.lua_getfield(L, Lua.LUA_GLOBALSINDEX, "debug");
-			if (!Lua.lua_istable(L, -1))
+			Lua.LuaGetField(L, Lua.LUA_GLOBALSINDEX, "debug");
+			if (!Lua.LuaIsTable(L, -1))
 			{
-				Lua.lua_pop(L, 1);
+				Lua.LuaPop(L, 1);
 				return 1;
 			}
-			Lua.lua_getfield(L, -1, "traceback");
-			if (!Lua.lua_isfunction(L, -1))
+			Lua.LuaGetField(L, -1, "traceback");
+			if (!Lua.LuaIsFunction(L, -1))
 			{
-				Lua.lua_pop(L, 2);
+				Lua.LuaPop(L, 2);
 				return 1;
 			}
-			Lua.lua_pushvalue(L, 1);  /* pass error message */
-			Lua.lua_pushinteger(L, 2);  /* skip this function and traceback */
-			Lua.lua_call(L, 2, 1);  /* call debug.traceback */
+			Lua.LuaPushValue(L, 1);  /* pass error message */
+			Lua.LuaPushInteger(L, 2);  /* skip this function and traceback */
+			Lua.LuaCall(L, 2, 1);  /* call debug.traceback */
 			return 1;
 		}
 
 
-		static int docall(Lua.lua_State L, int narg, int clear)
+		static int docall(Lua.LuaState L, int narg, int clear)
 		{
 			int status;
-			int base_ = Lua.lua_gettop(L) - narg;  /* function index */
-			Lua.lua_pushcfunction(L, traceback);  /* push traceback function */
-			Lua.lua_insert(L, base_);  /* put it under chunk and args */
+			int base_ = Lua.LuaGetTop(L) - narg;  /* function index */
+			Lua.LuaPushCFunction(L, traceback);  /* push traceback function */
+			Lua.LuaInsert(L, base_);  /* put it under chunk and args */
 			//signal(SIGINT, laction);
-			status = Lua.lua_pcall(L, narg, ((clear!=0) ? 0 : Lua.LUA_MULTRET), base_);
+			status = Lua.LuaPCall(L, narg, ((clear!=0) ? 0 : Lua.LUA_MULTRET), base_);
 			//signal(SIGINT, SIG_DFL);
-			Lua.lua_remove(L, base_);  /* remove traceback function */
+			Lua.LuaRemove(L, base_);  /* remove traceback function */
 			/* force a complete garbage collection in case of errors */
-			if (status != 0) Lua.lua_gc(L, Lua.LUA_GCCOLLECT, 0);
+			if (status != 0) Lua.LuaGC(L, Lua.LUA_GCCOLLECT, 0);
 			return status;
 		}
 
@@ -130,68 +130,68 @@ namespace KopiLua
 		}
 
 
-		static int getargs(Lua.lua_State L, string[] argv, int n)
+		static int getargs(Lua.LuaState L, string[] argv, int n)
 		{
 			int narg;
 			int i;
 			int argc = argv.Length;	/* count total number of arguments */
 			narg = argc - (n + 1);  /* number of arguments to the script */
-			Lua.luaL_checkstack(L, narg + 3, "too many arguments to script");
+			Lua.LuaLCheckStack(L, narg + 3, "too many arguments to script");
 			for (i = n + 1; i < argc; i++)
-			Lua.lua_pushstring(L, argv[i]);
-			Lua.lua_createtable(L, narg, n + 1);
+			Lua.LuaPushString(L, argv[i]);
+			Lua.LuaCreateTable(L, narg, n + 1);
 			for (i = 0; i < argc; i++)
 			{
-				Lua.lua_pushstring(L, argv[i]);
-				Lua.lua_rawseti(L, -2, i - n);
+				Lua.LuaPushString(L, argv[i]);
+				Lua.LuaRawSetI(L, -2, i - n);
 			}
 			return narg;
 		}
 
 
-		static int dofile(Lua.lua_State L, Lua.CharPtr name)
+		static int dofile(Lua.LuaState L, Lua.CharPtr name)
 		{
-			int status = (Lua.luaL_loadfile(L, name)!=0) || (docall(L, 0, 1)!=0) ? 1 : 0;
+			int status = (Lua.LuaLLoadFile(L, name)!=0) || (docall(L, 0, 1)!=0) ? 1 : 0;
 			return report(L, status);
 		}
 
 
-		static int dostring(Lua.lua_State L, Lua.CharPtr s, Lua.CharPtr name)
+		static int dostring(Lua.LuaState L, Lua.CharPtr s, Lua.CharPtr name)
 		{
-			int status = (Lua.luaL_loadbuffer(L, s, (uint)Lua.strlen(s), name)!=0) || (docall(L, 0, 1)!=0) ? 1 : 0;
+			int status = (Lua.LuaLLoadBuffer(L, s, (uint)Lua.strlen(s), name)!=0) || (docall(L, 0, 1)!=0) ? 1 : 0;
 			return report(L, status);
 		}
 
 
-		static int dolibrary(Lua.lua_State L, Lua.CharPtr name)
+		static int dolibrary(Lua.LuaState L, Lua.CharPtr name)
 		{
-			Lua.lua_getglobal(L, "require");
-			Lua.lua_pushstring(L, name);
+			Lua.LuaGetGlobal(L, "require");
+			Lua.LuaPushString(L, name);
 			return report(L, docall(L, 1, 1));
 		}
 
 
-		static Lua.CharPtr get_prompt(Lua.lua_State L, int firstline)
+		static Lua.CharPtr get_prompt(Lua.LuaState L, int firstline)
 		{
 			Lua.CharPtr p;
-			Lua.lua_getfield(L, Lua.LUA_GLOBALSINDEX, (firstline!=0) ? "_PROMPT" : "_PROMPT2");
-			p = Lua.lua_tostring(L, -1);
+			Lua.LuaGetField(L, Lua.LUA_GLOBALSINDEX, (firstline!=0) ? "_PROMPT" : "_PROMPT2");
+			p = Lua.LuaToString(L, -1);
 			if (p == null) p = ((firstline!=0) ? Lua.LUA_PROMPT : Lua.LUA_PROMPT2);
-			Lua.lua_pop(L, 1);  /* remove global */
+			Lua.LuaPop(L, 1);  /* remove global */
 			return p;
 		}
 
 
-		static int incomplete(Lua.lua_State L, int status)
+		static int incomplete(Lua.LuaState L, int status)
 		{
 			if (status == Lua.LUA_ERRSYNTAX)
 			{
 				uint lmsg;
-				Lua.CharPtr msg = Lua.lua_tolstring(L, -1, out lmsg);
+				Lua.CharPtr msg = Lua.LuaToLString(L, -1, out lmsg);
 				Lua.CharPtr tp = msg + lmsg - (Lua.strlen(Lua.LUA_QL("<eof>")));
 				if (Lua.strstr(msg, Lua.LUA_QL("<eof>")) == tp)
 				{
-					Lua.lua_pop(L, 1);
+					Lua.LuaPop(L, 1);
 					return 1;
 				}
 			}
@@ -199,7 +199,7 @@ namespace KopiLua
 		}
 
 
-		static int pushline(Lua.lua_State L, int firstline)
+		static int pushline(Lua.LuaState L, int firstline)
 		{
 			Lua.CharPtr buffer = new char[Lua.LUA_MAXINPUT];
 			Lua.CharPtr b = new Lua.CharPtr(buffer);
@@ -211,37 +211,37 @@ namespace KopiLua
 			if (l > 0 && b[l - 1] == '\n')  /* line ends with newline? */
 				b[l - 1] = '\0';  /* remove it */
 			if ((firstline!=0) && (b[0] == '='))  /* first line starts with `=' ? */
-				Lua.lua_pushfstring(L, "return %s", b + 1);  /* change it to `return' */
+				Lua.LuaPushFString(L, "return %s", b + 1);  /* change it to `return' */
 			else
-				Lua.lua_pushstring(L, b);
+				Lua.LuaPushString(L, b);
 			Lua.lua_freeline(L, b);
 			return 1;
 		}
 
 
-		static int loadline(Lua.lua_State L)
+		static int loadline(Lua.LuaState L)
 		{
 			int status;
-			Lua.lua_settop(L, 0);
+			Lua.LuaSetTop(L, 0);
 			if (pushline(L, 1)==0)
 				return -1;  /* no input */
 			for (; ; )
 			{  /* repeat until gets a complete line */
-				status = Lua.luaL_loadbuffer(L, Lua.lua_tostring(L, 1), Lua.lua_strlen(L, 1), "=stdin");
+				status = Lua.LuaLLoadBuffer(L, Lua.LuaToString(L, 1), Lua.LuaStrLen(L, 1), "=stdin");
 				if (incomplete(L, status)==0) break;  /* cannot try to add lines? */
 				if (pushline(L, 0)==0)  /* no more input? */
 					return -1;
-				Lua.lua_pushliteral(L, "\n");  /* add a new line... */
-				Lua.lua_insert(L, -2);  /* ...between the two lines */
-				Lua.lua_concat(L, 3);  /* join them */
+				Lua.LuaPushLiteral(L, "\n");  /* add a new line... */
+				Lua.LuaInsert(L, -2);  /* ...between the two lines */
+				Lua.LuaConcat(L, 3);  /* join them */
 			}
 			Lua.lua_saveline(L, 1);
-			Lua.lua_remove(L, 1);  /* remove line */
+			Lua.LuaRemove(L, 1);  /* remove line */
 			return status;
 		}
 
 
-		static void dotty(Lua.lua_State L)
+		static void dotty(Lua.LuaState L)
 		{
 			int status;
 			Lua.CharPtr oldprogname = progname;
@@ -250,38 +250,38 @@ namespace KopiLua
 			{
 				if (status == 0) status = docall(L, 0, 0);
 				report(L, status);
-				if (status == 0 && Lua.lua_gettop(L) > 0)
+				if (status == 0 && Lua.LuaGetTop(L) > 0)
 				{  /* any result to print? */
-					Lua.lua_getglobal(L, "print");
-					Lua.lua_insert(L, 1);
-					if (Lua.lua_pcall(L, Lua.lua_gettop(L) - 1, 0, 0) != 0)
-						l_message(progname, Lua.lua_pushfstring(L,
+					Lua.LuaGetGlobal(L, "print");
+					Lua.LuaInsert(L, 1);
+					if (Lua.LuaPCall(L, Lua.LuaGetTop(L) - 1, 0, 0) != 0)
+						l_message(progname, Lua.LuaPushFString(L,
 											   "error calling " + Lua.LUA_QL("print").ToString() + " (%s)",
-											   Lua.lua_tostring(L, -1)));
+											   Lua.LuaToString(L, -1)));
 				}
 			}
-			Lua.lua_settop(L, 0);  /* clear stack */
+			Lua.LuaSetTop(L, 0);  /* clear stack */
 			Lua.fputs("\n", Lua.stdout);
 			Lua.fflush(Lua.stdout);
 			progname = oldprogname;
 		}
 
 
-		static int handle_script(Lua.lua_State L, string[] argv, int n)
+		static int handle_script(Lua.LuaState L, string[] argv, int n)
 		{
 			int status;
 			Lua.CharPtr fname;
 			int narg = getargs(L, argv, n);  /* collect arguments */
-			Lua.lua_setglobal(L, "arg");
+			Lua.LuaSetGlobal(L, "arg");
 			fname = argv[n];
 			if (Lua.strcmp(fname, "-") == 0 && Lua.strcmp(argv[n - 1], "--") != 0)
 				fname = null;  /* stdin */
-			status = Lua.luaL_loadfile(L, fname);
-			Lua.lua_insert(L, -(narg + 1));
+			status = Lua.LuaLLoadFile(L, fname);
+			Lua.LuaInsert(L, -(narg + 1));
 			if (status == 0)
 				status = docall(L, narg, 0);
 			else
-				Lua.lua_pop(L, narg);
+				Lua.LuaPop(L, narg);
 			return report(L, status);
 		}
 
@@ -341,20 +341,20 @@ namespace KopiLua
 		}
 
 
-		static int runargs(Lua.lua_State L, string[] argv, int n)
+		static int runargs(Lua.LuaState L, string[] argv, int n)
 		{
 			int i;
 			for (i = 1; i < n; i++)
 			{
 				if (argv[i] == null) continue;
-				Lua.lua_assert(argv[i][0] == '-');
+				Lua.LuaAssert(argv[i][0] == '-');
 				switch (argv[i][1])
 				{  /* option */
 					case 'e':
 						{
 							string chunk = argv[i].Substring(2);
 							if (chunk == "") chunk = argv[++i];
-							Lua.lua_assert(chunk != null);
+							Lua.LuaAssert(chunk != null);
 							if (dostring(L, chunk, "=(command line)") != 0)
 								return 1;
 							break;
@@ -363,7 +363,7 @@ namespace KopiLua
 						{
 							string filename = argv[i].Substring(2);
 							if (filename == "") filename = argv[++i];
-							Lua.lua_assert(filename != null);
+							Lua.LuaAssert(filename != null);
 							if (dolibrary(L, filename) != 0)
 								return 1;  /* stop if file fails */
 							break;
@@ -375,7 +375,7 @@ namespace KopiLua
 		}
 
 
-		static int handle_luainit(Lua.lua_State L)
+		static int handle_luainit(Lua.LuaState L)
 		{
 			Lua.CharPtr init = Lua.getenv(Lua.LUA_INIT);
 			if (init == null) return 0;  /* status OK */
@@ -394,17 +394,17 @@ namespace KopiLua
 		};
 
 
-		static int pmain(Lua.lua_State L)
+		static int pmain(Lua.LuaState L)
 		{
-			Smain s = (Smain)Lua.lua_touserdata(L, 1);
+			Smain s = (Smain)Lua.LuaToUserData(L, 1);
 			string[] argv = s.argv;
 			int script;
 			int has_i = 0, has_v = 0, has_e = 0;
 			globalL = L;
 			if ((argv.Length>0) && (argv[0]!="")) progname = argv[0];
-			Lua.lua_gc(L, Lua.LUA_GCSTOP, 0);  /* stop collector during initialization */
-			Lua.luaL_openlibs(L);  /* open libraries */
-			Lua.lua_gc(L, Lua.LUA_GCRESTART, 0);
+			Lua.LuaGC(L, Lua.LUA_GCSTOP, 0);  /* stop collector during initialization */
+			Lua.LuaLOpenLibs(L);  /* open libraries */
+			Lua.LuaGC(L, Lua.LUA_GCRESTART, 0);
 			s.status = handle_luainit(L);
 			if (s.status != 0) return 0;
 			script = collectargs(argv, ref has_i, ref has_v, ref has_e);
@@ -446,7 +446,7 @@ namespace KopiLua
 
 			int status;
 			Smain s = new Smain();
-			Lua.lua_State L = Lua.lua_open();  /* create state */
+			Lua.LuaState L = Lua.LuaOpen();  /* create state */
 			if (L == null)
 			{
 				l_message(args[0], "cannot create state: not enough memory");
@@ -454,9 +454,9 @@ namespace KopiLua
 			}
 			s.argc = args.Length;
 			s.argv = args;
-			status = Lua.lua_cpcall(L, pmain, s);
+			status = Lua.LuaCPCall(L, pmain, s);
 			report(L, status);
-			Lua.lua_close(L);
+			Lua.LuaClose(L);
 			return (status!=0) || (s.status!=0) ? Lua.EXIT_FAILURE : Lua.EXIT_SUCCESS;
 		}
 

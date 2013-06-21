@@ -9,7 +9,7 @@ namespace Tests.iOS
 	[TestFixture]
 	public class core
 	{
-		Lua.lua_State state;
+		Lua.LuaState state;
 		string GetTestPath(string name)
 		{
 			string filePath = Path.Combine (Path.Combine ("LuaTests", "core"), name + ".lua");
@@ -20,20 +20,20 @@ namespace Tests.iOS
 		{
 			string error = string.Empty;
 
-			int result = Lua.luaL_loadfile(state, path);
+			int result = Lua.LuaLLoadFile(state, path);
 
 			if (result != 0) {
-				Lua.CharPtr pstring = Lua.lua_tostring (state, 1);
+				Lua.CharPtr pstring = Lua.LuaToString (state, 1);
 				if (pstring != null)
 					error = pstring.ToString();
 			}
 
 			Assert.True(result == 0, "Fail loading file: " + path + "ERROR:" + error);
 
-			result = Lua.lua_pcall(state, 0, -1, 0);
+			result = Lua.LuaPCall(state, 0, -1, 0);
 
 			if (result != 0) {
-				Lua.CharPtr pstring = Lua.lua_tostring(state, 1);
+				Lua.CharPtr pstring = Lua.LuaToString(state, 1);
 				if (pstring != null)
 					error = pstring.ToString();
 			}
@@ -52,14 +52,14 @@ namespace Tests.iOS
 		[SetUp]
 		public void Setup()
 		{
-			state = Lua.luaL_newstate ();
-			Lua.luaL_openlibs (state);
+			state = Lua.LuaLNewState ();
+			Lua.LuaLOpenLibs (state);
 		}
 
 		[TearDown]
 		public void TearDown ()
 		{
-			Lua.lua_close (state);
+			Lua.LuaClose (state);
 			state = null;
 		}
 

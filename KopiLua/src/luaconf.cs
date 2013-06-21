@@ -17,7 +17,7 @@ namespace KopiLua
 	using LUA_NUMBER	= System.Double;
 	using LUAI_UACNUMBER	= System.Double;
 	using LUA_INTFRM_T		= System.Int64;
-	using TValue = Lua.lua_TValue;
+	using TValue = Lua.LuaTypeValue;
 	using lua_Number = System.Double;
     using System.Globalization;
 
@@ -293,14 +293,14 @@ namespace KopiLua
 		//	  add_history(lua_tostring(L, idx));  /* add it to history */
 		//#define lua_freeline(L,b)	((void)L, free(b))
 #else
-		public static bool lua_readline(lua_State L, CharPtr b, CharPtr p)
+		public static bool lua_readline(LuaState L, CharPtr b, CharPtr p)
 		{
 			fputs(p, stdout);
 			fflush(stdout);		/* show prompt */
 			return (fgets(b, stdin) != null);  /* get line */
 		}
-		public static void lua_saveline(lua_State L, int idx)	{}
-		public static void lua_freeline(lua_State L, CharPtr b)	{}
+		public static void lua_saveline(LuaState L, int idx)	{}
+		public static void lua_freeline(LuaState L, CharPtr b)	{}
 #endif
 
 //#endif
@@ -393,8 +393,8 @@ namespace KopiLua
 			public static void luai_apicheck(lua_State L, bool o)	{Debug.Assert(o);}
 			public static void luai_apicheck(lua_State L, int o) {Debug.Assert(o != 0);}
 		#else
-			public static void luai_apicheck(lua_State L, bool o)	{}
-			public static void luai_apicheck(lua_State L, int o) { }
+			public static void luai_apicheck(LuaState L, bool o)	{}
+			public static void luai_apicheck(LuaState L, int o) { }
 		#endif
 
 
@@ -655,10 +655,10 @@ namespace KopiLua
 
 		public class LuaException : Exception
 		{
-			public lua_State L;
-			public lua_longjmp c;
+			public LuaState L;
+			public LuaLongJmp c;
 
-			public LuaException(lua_State L, lua_longjmp c) { this.L = L; this.c = c; }
+			public LuaException(LuaState L, LuaLongJmp c) { this.L = L; this.c = c; }
 		}
 
 		/*
@@ -671,10 +671,10 @@ namespace KopiLua
 		*/
 		//#if defined(__cplusplus)
 		///* C++ exceptions */
-		public static void LUAI_THROW(lua_State L, lua_longjmp c)	{throw new LuaException(L, c);}
+		public static void LUAI_THROW(LuaState L, LuaLongJmp c)	{throw new LuaException(L, c);}
 		//#define LUAI_TRY(L,c,a)	try { a } catch(...) \
 		//    { if ((c).status == 0) (c).status = -1; }
-		public static void LUAI_TRY(lua_State L, lua_longjmp c, object a) {
+		public static void LUAI_TRY(LuaState L, LuaLongJmp c, object a) {
 			if (c.status == 0) c.status = -1;
 		}
 		//#define luai_jmpbuf	int  /* dummy variable */
@@ -746,8 +746,8 @@ namespace KopiLua
 
 		//#else
 
-		public static Stream lua_popen(lua_State L, CharPtr c, CharPtr m) { luaL_error(L, LUA_QL("popen") + " not supported"); return null; }
-		public static int lua_pclose(lua_State L, Stream file) { return 0; }
+		public static Stream LuaPopen(LuaState L, CharPtr c, CharPtr m) { LuaLError(L, LUA_QL("popen") + " not supported"); return null; }
+		public static int LuaPClose(LuaState L, Stream file) { return 0; }
 	
 		//#endif
 
@@ -788,12 +788,12 @@ namespace KopiLua
 		** CHANGE them if you defined LUAI_EXTRASPACE and need to do something
 		** extra when a thread is created/deleted/resumed/yielded.
 		*/
-		public static void luai_userstateopen(lua_State L)					{}
-		public static void luai_userstateclose(lua_State L)					{}
-		public static void luai_userstatethread(lua_State L, lua_State L1)	{}
-		public static void luai_userstatefree(lua_State L)					{}
-		public static void luai_userstateresume(lua_State L,int n)			{}
-		public static void luai_userstateyield(lua_State L,int n)			{}
+		public static void luai_userstateopen(LuaState L)					{}
+		public static void luai_userstateclose(LuaState L)					{}
+		public static void luai_userstatethread(LuaState L, LuaState L1)	{}
+		public static void luai_userstatefree(LuaState L)					{}
+		public static void luai_userstateresume(LuaState L,int n)			{}
+		public static void luai_userstateyield(LuaState L,int n)			{}
 
 
 		/*
@@ -1601,13 +1601,13 @@ namespace KopiLua
 		// amount of memory allocated.
 		public static int GetUnmanagedSize(Type t)
 		{
-			if (t == typeof(global_State))
+			if (t == typeof(GlobalState))
 				return 228;
 			else if (t == typeof(LG))
 				return 376;
 			else if (t == typeof(CallInfo))
 				return 24;
-			else if (t == typeof(lua_TValue))
+			else if (t == typeof(LuaTypeValue))
 				return 16;
 			else if (t == typeof(Table))
 				return 32;
@@ -1623,13 +1623,13 @@ namespace KopiLua
 				return 0;	// handle this one manually in the code
 			else if (t == typeof(Proto))
 				return 76;
-			else if (t == typeof(luaL_Reg))
+			else if (t == typeof(LuaLReg))
 				return 8;
-			else if (t == typeof(luaL_Buffer))
+			else if (t == typeof(LuaLBuffer))
 				return 524;
-			else if (t == typeof(lua_State))
+			else if (t == typeof(LuaState))
 				return 120;
-			else if (t == typeof(lua_Debug))
+			else if (t == typeof(LuaDebug))
 				return 100;
 			else if (t == typeof(CallS))
 				return 8;
@@ -1637,7 +1637,7 @@ namespace KopiLua
 				return 520;
 			else if (t == typeof(LoadS))
 				return 8;
-			else if (t == typeof(lua_longjmp))
+			else if (t == typeof(LuaLongJmp))
 				return 72;
 			else if (t == typeof(SParser))
 				return 20;
@@ -1649,7 +1649,7 @@ namespace KopiLua
 				return 572;
 			else if (t == typeof(GCheader))
 				return 8;
-			else if (t == typeof(lua_TValue))
+			else if (t == typeof(LuaTypeValue))
 				return 16;
 			else if (t == typeof(TString))
 				return 16;

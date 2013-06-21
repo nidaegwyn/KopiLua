@@ -12,44 +12,44 @@ using System.Runtime.InteropServices;
 
 namespace KopiLua
 {
-	using TValue = Lua.lua_TValue;
-	using StkId = Lua.lua_TValue;
+	using TValue = Lua.LuaTypeValue;
+	using StkId = Lua.LuaTypeValue;
 	using Instruction = System.UInt32;
 
 	public partial class Lua
 	{
 
-		public static int sizeCclosure(int n) {
+		public static int SizeCclosure(int n) {
 			return GetUnmanagedSize(typeof(CClosure)) + GetUnmanagedSize(typeof(TValue)) * (n - 1);
 		}
 
-		public static int sizeLclosure(int n) {
+		public static int SizeLclosure(int n) {
 			return GetUnmanagedSize(typeof(LClosure)) + GetUnmanagedSize(typeof(TValue)) * (n - 1);
 		}
 
-		public static Closure luaF_newCclosure (lua_State L, int nelems, Table e) {
+		public static Closure LuaFNewCclosure (LuaState L, int nelems, Table e) {
 		  //Closure c = (Closure)luaM_malloc(L, sizeCclosure(nelems));	
-		  Closure c = luaM_new<Closure>(L);
-		  AddTotalBytes(L, sizeCclosure(nelems));
-		  luaC_link(L, obj2gco(c), LUA_TFUNCTION);
+		  Closure c = LuaMNew<Closure>(L);
+		  AddTotalBytes(L, SizeCclosure(nelems));
+		  LuaCLink(L, obj2gco(c), LUA_TFUNCTION);
 		  c.c.isC = 1;
 		  c.c.env = e;
-		  c.c.nupvalues = cast_byte(nelems);
+		  c.c.nupvalues = CastByte(nelems);
 		  c.c.upvalue = new TValue[nelems];
 		  for (int i = 0; i < nelems; i++)
-			  c.c.upvalue[i] = new lua_TValue();
+			  c.c.upvalue[i] = new LuaTypeValue();
 		  return c;
 		}
 
 
-		public static Closure luaF_newLclosure (lua_State L, int nelems, Table e) {
+		public static Closure LuaFNewLClosure (LuaState L, int nelems, Table e) {
 		  //Closure c = (Closure)luaM_malloc(L, sizeLclosure(nelems));
-		  Closure c = luaM_new<Closure>(L);
-		  AddTotalBytes(L, sizeLclosure(nelems));
-		  luaC_link(L, obj2gco(c), LUA_TFUNCTION);
+		  Closure c = LuaMNew<Closure>(L);
+		  AddTotalBytes(L, SizeLclosure(nelems));
+		  LuaCLink(L, obj2gco(c), LUA_TFUNCTION);
 		  c.l.isC = 0;
 		  c.l.env = e;
-		  c.l.nupvalues = cast_byte(nelems);
+		  c.l.nupvalues = CastByte(nelems);
 		  c.l.upvals = new UpVal[nelems];
 		  for (int i = 0; i < nelems; i++)
 			  c.l.upvals[i] = new UpVal();
@@ -58,31 +58,31 @@ namespace KopiLua
 		}
 
 
-		public static UpVal luaF_newupval (lua_State L) {
-		  UpVal uv = luaM_new<UpVal>(L);
-		  luaC_link(L, obj2gco(uv), LUA_TUPVAL);
+		public static UpVal LuaFNewUpVal (LuaState L) {
+		  UpVal uv = LuaMNew<UpVal>(L);
+		  LuaCLink(L, obj2gco(uv), LUATUPVAL);
 		  uv.v = uv.u.value;
-		  setnilvalue(uv.v);
+		  SetNilValue(uv.v);
 		  return uv;
 		}
 
-		public static UpVal luaF_findupval (lua_State L, StkId level) {
-		  global_State g = G(L);
+		public static UpVal LuaFindUpVal (LuaState L, StkId level) {
+		  GlobalState g = G(L);
 		  GCObjectRef pp = new OpenValRef(L);
 		  UpVal p;
 		  UpVal uv;
 		  while (pp.get() != null && (p = ngcotouv(pp.get())).v >= level) {
-			lua_assert(p.v != p.u.value);
+			LuaAssert(p.v != p.u.value);
 			if (p.v == level) {  /* found a corresponding upvalue? */
-			  if (isdead(g, obj2gco(p)))  /* is it dead? */
-				changewhite(obj2gco(p));  /* ressurect it */
+			  if (IsDead(g, obj2gco(p)))  /* is it dead? */
+				ChangeWhite(obj2gco(p));  /* ressurect it */
 			  return p;
 			}
 			pp = new NextRef(p);
 		  }
-		  uv = luaM_new<UpVal>(L);  /* not found: create a new one */
-		  uv.tt = LUA_TUPVAL;
-		  uv.marked = luaC_white(g);
+		  uv = LuaMNew<UpVal>(L);  /* not found: create a new one */
+		  uv.tt = LUATUPVAL;
+		  uv.marked = LuaCWhite(g);
 		  uv.v = level;  /* current value lives in the stack */
 		  uv.next = pp.get();  /* chain it in the proper position */
 		  pp.set( obj2gco(uv) );
@@ -90,47 +90,47 @@ namespace KopiLua
 		  uv.u.l.next = g.uvhead.u.l.next;
 		  uv.u.l.next.u.l.prev = uv;
 		  g.uvhead.u.l.next = uv;
-		  lua_assert(uv.u.l.next.u.l.prev == uv && uv.u.l.prev.u.l.next == uv);
+		  LuaAssert(uv.u.l.next.u.l.prev == uv && uv.u.l.prev.u.l.next == uv);
 		  return uv;
 		}
 
 
-		private static void unlinkupval (UpVal uv) {
-		  lua_assert(uv.u.l.next.u.l.prev == uv && uv.u.l.prev.u.l.next == uv);
+		private static void UnlinkUpVal (UpVal uv) {
+		  LuaAssert(uv.u.l.next.u.l.prev == uv && uv.u.l.prev.u.l.next == uv);
 		  uv.u.l.next.u.l.prev = uv.u.l.prev;  /* remove from `uvhead' list */
 		  uv.u.l.prev.u.l.next = uv.u.l.next;
 		}
 
 
-		public static void luaF_freeupval (lua_State L, UpVal uv) {
+		public static void LuaFreeUpVal (LuaState L, UpVal uv) {
 		  if (uv.v != uv.u.value)  /* is it open? */
-			unlinkupval(uv);  /* remove from open list */
-		  luaM_free(L, uv);  /* free upvalue */
+			UnlinkUpVal(uv);  /* remove from open list */
+		  LuaMFree(L, uv);  /* free upvalue */
 		}
 
 
-		public static void luaF_close (lua_State L, StkId level) {
+		public static void LuaFClose (LuaState L, StkId level) {
 		  UpVal uv;
-		  global_State g = G(L);
+		  GlobalState g = G(L);
 		  while (L.openupval != null && (uv = ngcotouv(L.openupval)).v >= level) {
 			GCObject o = obj2gco(uv);
-			lua_assert(!isblack(o) && uv.v != uv.u.value);
+			LuaAssert(!IsBlack(o) && uv.v != uv.u.value);
 			L.openupval = uv.next;  /* remove from `open' list */
-			if (isdead(g, o))
-			  luaF_freeupval(L, uv);  /* free upvalue */
+			if (IsDead(g, o))
+			  LuaFreeUpVal(L, uv);  /* free upvalue */
 			else {
-			  unlinkupval(uv);
-			  setobj(L, uv.u.value, uv.v);
+			  UnlinkUpVal(uv);
+			  SetObj(L, uv.u.value, uv.v);
 			  uv.v = uv.u.value;  /* now current value lives here */
-			  luaC_linkupval(L, uv);  /* link upvalue into `gcroot' list */
+			  LuaCLinkUpVal(L, uv);  /* link upvalue into `gcroot' list */
 			}
 		  }
 		}
 
 
-		public static Proto luaF_newproto (lua_State L) {
-		  Proto f = luaM_new<Proto>(L);
-		  luaC_link(L, obj2gco(f), LUA_TPROTO);
+		public static Proto LuaFNewProto (LuaState L) {
+		  Proto f = LuaMNew<Proto>(L);
+		  LuaCLink(L, obj2gco(f), LUATPROTO);
 		  f.k = null;
 		  f.sizek = 0;
 		  f.p = null;
@@ -153,20 +153,20 @@ namespace KopiLua
 		  return f;
 		}
 
-		public static void luaF_freeproto (lua_State L, Proto f) {
-		  luaM_freearray<Instruction>(L, f.code);
-		  luaM_freearray<Proto>(L, f.p);
-		  luaM_freearray<TValue>(L, f.k);
-		  luaM_freearray<Int32>(L, f.lineinfo);
-		  luaM_freearray<LocVar>(L, f.locvars);
-		  luaM_freearray<TString>(L, f.upvalues);
-		  luaM_free(L, f);
+		public static void LuaFFreeProto (LuaState L, Proto f) {
+		  LuaMFreeArray<Instruction>(L, f.code);
+		  LuaMFreeArray<Proto>(L, f.p);
+		  LuaMFreeArray<TValue>(L, f.k);
+		  LuaMFreeArray<Int32>(L, f.lineinfo);
+		  LuaMFreeArray<LocVar>(L, f.locvars);
+		  LuaMFreeArray<TString>(L, f.upvalues);
+		  LuaMFree(L, f);
 		}
 
 		// we have a gc, so nothing to do
-		public static void luaF_freeclosure (lua_State L, Closure c) {
-		  int size = (c.c.isC != 0) ? sizeCclosure(c.c.nupvalues) :
-								  sizeLclosure(c.l.nupvalues);
+		public static void LuaFFreeClosure (LuaState L, Closure c) {
+		  int size = (c.c.isC != 0) ? SizeCclosure(c.c.nupvalues) :
+								  SizeLclosure(c.l.nupvalues);
 		  //luaM_freemem(L, c, size);
 		  SubtractTotalBytes(L, size);
 		}
@@ -176,13 +176,13 @@ namespace KopiLua
 		** Look for n-th local variable at line `line' in function `func'.
 		** Returns null if not found.
 		*/
-		public static CharPtr luaF_getlocalname (Proto f, int local_number, int pc) {
+		public static CharPtr LuaFGetLocalName (Proto f, int local_number, int pc) {
 		  int i;
 		  for (i = 0; i<f.sizelocvars && f.locvars[i].startpc <= pc; i++) {
 			if (pc < f.locvars[i].endpc) {  /* is variable active? */
 			  local_number--;
 			  if (local_number == 0)
-				return getstr(f.locvars[i].varname);
+				return GetStr(f.locvars[i].varname);
 			}
 		  }
 		  return null;  /* not found */

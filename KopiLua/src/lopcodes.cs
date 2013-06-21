@@ -9,7 +9,7 @@ using System.Text;
 
 namespace KopiLua
 {
-	using lu_byte = System.Byte;
+	using LuaByteType = System.Byte;
 	using Instruction = System.UInt32;
 
 	public partial class Lua
@@ -361,12 +361,12 @@ namespace KopiLua
 		};
 
 
-		private static lu_byte opmode(lu_byte t, lu_byte a, OpArgMask b, OpArgMask c, OpMode m)
+		private static LuaByteType opmode(LuaByteType t, LuaByteType a, OpArgMask b, OpArgMask c, OpMode m)
 		{
-			return (lu_byte)(((t) << 7) | ((a) << 6) | (((lu_byte)b) << 4) | (((lu_byte)c) << 2) | ((lu_byte)m));
+			return (LuaByteType)(((t) << 7) | ((a) << 6) | (((LuaByteType)b) << 4) | (((LuaByteType)c) << 2) | ((LuaByteType)m));
 		}
 
-		private readonly static lu_byte[] luaP_opmodes = {
+		private readonly static LuaByteType[] luaP_opmodes = {
 		/*       T  A    B       C     mode		   opcode	*/
 		  opmode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC) 		/* OP_MOVE */
 		 ,opmode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgN, OpMode.iABx)		/* OP_LOADK */

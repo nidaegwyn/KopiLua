@@ -15,13 +15,13 @@ using System.Runtime.Serialization;
 
 namespace KopiLua
 {
-	using lua_Number = System.Double;
-	using TValue = Lua.lua_TValue;
+	using LuaNumberType = System.Double;
+	using TValue = Lua.LuaTypeValue;
 
 	public partial class Lua
 	{
 		public class DumpState {
-		 public lua_State L;
+		 public LuaState L;
          [CLSCompliantAttribute(false)]
 		 public lua_Writer writer;
 		 public object data;
@@ -66,9 +66,9 @@ namespace KopiLua
 		{
 		 if (D.status==0)
 		 {
-		  lua_unlock(D.L);
+		  LuaUnlock(D.L);
 		  D.status=D.writer(D.L,b,size,D.data);
-		  lua_lock(D.L);
+		  LuaLock(D.L);
 		 }
 		}
 
@@ -83,7 +83,7 @@ namespace KopiLua
 		 DumpVar(x,D);
 		}
 
-		private static void DumpNumber(lua_Number x, DumpState D)
+		private static void DumpNumber(LuaNumberType x, DumpState D)
 		{
 		 DumpVar(x,D);
 		}
@@ -96,7 +96,7 @@ namespace KopiLua
 
 		private static void DumpString(TString s, DumpState D)
 		{
-		 if (s==null || getstr(s)==null)
+		 if (s==null || GetStr(s)==null)
 		 {
 		  uint size=0;
 		  DumpVar(size,D);
@@ -105,7 +105,7 @@ namespace KopiLua
 		 {
 		  uint size=s.tsv.len+1;		/* include trailing '\0' */
 		  DumpVar(size,D);
-		  DumpBlock(getstr(s),size,D);
+		  DumpBlock(GetStr(s),size,D);
 		 }
 		}
 
@@ -121,22 +121,22 @@ namespace KopiLua
 		 for (i=0; i<n; i++)
 		 {
 		  /*const*/ TValue o=f.k[i];
-		  DumpChar(ttype(o),D);
-		  switch (ttype(o))
+		  DumpChar(TType(o),D);
+		  switch (TType(o))
 		  {
 		   case LUA_TNIL:
 			break;
 		   case LUA_TBOOLEAN:
-			DumpChar(bvalue(o),D);
+			DumpChar(BValue(o),D);
 			break;
 		   case LUA_TNUMBER:
-			DumpNumber(nvalue(o),D);
+			DumpNumber(NValue(o),D);
 			break;
 		   case LUA_TSTRING:
-			DumpString(rawtsvalue(o),D);
+			DumpString(RawTSValue(o),D);
 			break;
 		   default:
-			lua_assert(0);			/* cannot happen */
+			LuaAssert(0);			/* cannot happen */
 			break;
 		  }
 		 }
@@ -188,7 +188,7 @@ namespace KopiLua
 		** dump Lua function as precompiled chunk
 		*/
 		[CLSCompliantAttribute(false)]
-		public static int luaU_dump (lua_State L, Proto f, lua_Writer w, object data, int strip)
+		public static int LuaUDump (LuaState L, Proto f, lua_Writer w, object data, int strip)
 		{
 		 DumpState D = new DumpState();
 		 D.L=L;

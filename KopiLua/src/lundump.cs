@@ -14,10 +14,10 @@ using System.Runtime.Serialization;
 
 namespace KopiLua
 {
-	using TValue = Lua.lua_TValue;
+	using TValue = Lua.LuaTypeValue;
 	using lua_Number = System.Double;
 	using lu_byte = System.Byte;
-	using StkId = Lua.lua_TValue;
+	using StkId = Lua.LuaTypeValue;
 	using Instruction = System.UInt32;
 	using ZIO = Lua.Zio;
 
@@ -33,7 +33,7 @@ namespace KopiLua
 		public const int LUAC_HEADERSIZE		= 12;
 
 		public class LoadState{
-			public lua_State L;
+			public LuaState L;
 			public ZIO Z;
 			public Mbuffer b;
 			public CharPtr name;
@@ -50,8 +50,8 @@ namespace KopiLua
 
 		static void error(LoadState S, CharPtr why)
 		{
-		 luaO_pushfstring(S.L,"%s: %s in precompiled chunk",S.name,why);
-		 luaD_throw(S.L,LUA_ERRSYNTAX);
+		 LuaOPushFString(S.L,"%s: %s in precompiled chunk",S.name,why);
+		 LuaDThrow(S.L,LUA_ERRSYNTAX);
 		}
 		//#endif
 
@@ -179,7 +179,7 @@ namespace KopiLua
 		private static void LoadCode(LoadState S, Proto f)
 		{
 		 int n=LoadInt(S);
-		 f.code = luaM_newvector<Instruction>(S.L, n);
+		 f.code = LuaMNewVector<Instruction>(S.L, n);
 		 f.sizecode=n;
 		 f.code = (Instruction[])LoadVector(S, typeof(Instruction), n);
 		}
@@ -188,9 +188,9 @@ namespace KopiLua
 		{
 		 int i,n;
 		 n=LoadInt(S);
-		 f.k = luaM_newvector<TValue>(S.L, n);
+		 f.k = LuaMNewVector<TValue>(S.L, n);
 		 f.sizek=n;
-		 for (i=0; i<n; i++) setnilvalue(f.k[i]);
+		 for (i=0; i<n; i++) SetNilValue(f.k[i]);
 		 for (i=0; i<n; i++)
 		 {
 		  TValue o=f.k[i];
@@ -198,16 +198,16 @@ namespace KopiLua
 		  switch (t)
 		  {
 		   case LUA_TNIL:
-   			setnilvalue(o);
+   			SetNilValue(o);
 			break;
 		   case LUA_TBOOLEAN:
-   			setbvalue(o, LoadChar(S));
+   			SetBValue(o, LoadChar(S));
 			break;
 		   case LUA_TNUMBER:
-			setnvalue(o, LoadNumber(S));
+			SetNValue(o, LoadNumber(S));
 			break;
 		   case LUA_TSTRING:
-			setsvalue2n(S.L, o, LoadString(S));
+			SetSValue2N(S.L, o, LoadString(S));
 			break;
 		   default:
 			error(S,"bad constant");
@@ -215,7 +215,7 @@ namespace KopiLua
 		  }
 		 }
 		 n=LoadInt(S);
-		 f.p=luaM_newvector<Proto>(S.L,n);
+		 f.p=LuaMNewVector<Proto>(S.L,n);
 		 f.sizep=n;
 		 for (i=0; i<n; i++) f.p[i]=null;
 		 for (i=0; i<n; i++) f.p[i]=LoadFunction(S,f.source);
@@ -225,11 +225,11 @@ namespace KopiLua
 		{
 		 int i,n;
 		 n=LoadInt(S);
-		 f.lineinfo=luaM_newvector<int>(S.L,n);
+		 f.lineinfo=LuaMNewVector<int>(S.L,n);
 		 f.sizelineinfo=n;
 		 f.lineinfo = (int[])LoadVector(S, typeof(int), n);
 		 n=LoadInt(S);
-		 f.locvars=luaM_newvector<LocVar>(S.L,n);
+		 f.locvars=LuaMNewVector<LocVar>(S.L,n);
 		 f.sizelocvars=n;
 		 for (i=0; i<n; i++) f.locvars[i].varname=null;
 		 for (i=0; i<n; i++)
@@ -239,7 +239,7 @@ namespace KopiLua
 		  f.locvars[i].endpc=LoadInt(S);
 		 }
 		 n=LoadInt(S);
-		 f.upvalues=luaM_newvector<TString>(S.L, n);
+		 f.upvalues=LuaMNewVector<TString>(S.L, n);
 		 f.sizeupvalues=n;
 		 for (i=0; i<n; i++) f.upvalues[i]=null;
 		 for (i=0; i<n; i++) f.upvalues[i]=LoadString(S);
@@ -249,8 +249,8 @@ namespace KopiLua
 		{
 		 Proto f;
 		 if (++S.L.nCcalls > LUAI_MAXCCALLS) error(S,"code too deep");
-		 f=luaF_newproto(S.L);
-		 setptvalue2s(S.L,S.L.top,f); incr_top(S.L);
+		 f=LuaFNewProto(S.L);
+		 SetPTValue2S(S.L,S.L.top,f); IncrTop(S.L);
 		 f.source=LoadString(S); if (f.source==null) f.source=p;
 		 f.linedefined=LoadInt(S);
 		 f.lastlinedefined=LoadInt(S);
@@ -261,8 +261,8 @@ namespace KopiLua
 		 LoadCode(S,f);
 		 LoadConstants(S,f);
 		 LoadDebug(S,f);
-		 IF (luaG_checkcode(f)==0 ? 1 : 0, "bad code");
-		 StkId.dec(ref S.L.top);
+		 IF (LuaGCheckCode(f)==0 ? 1 : 0, "bad code");
+		 StkId.Dec(ref S.L.top);
 		 S.L.nCcalls--;
 		 return f;
 		}
@@ -279,7 +279,7 @@ namespace KopiLua
 		/*
 		** load precompiled chunk
 		*/
-		public static Proto luaU_undump (lua_State L, ZIO Z, Mbuffer buff, CharPtr name)
+		public static Proto luaU_undump (LuaState L, ZIO Z, Mbuffer buff, CharPtr name)
 		{
 		 LoadState S = new LoadState();
 		 if (name[0] == '@' || name[0] == '=')
