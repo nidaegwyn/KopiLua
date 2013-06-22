@@ -22,8 +22,8 @@ namespace KopiLua
 	public partial class Lua
 	{
 		#if LUA_COMPAT_GETN
-		public static int LuaLGetN(lua_State L, int t);
-		public static void LuaLSetN(lua_State L, int t, int n);
+		public static int LuaLGetN(LuaState L, int t);
+		public static void LuaLSetN(LuaState L, int t, int n);
 		#else
 		public static int LuaLGetN(LuaState L, int i) {return (int)LuaObjectLen(L, i);}
 		public static void LuaLSetN(LuaState L, int i, int j) {} /* no op! */
@@ -395,14 +395,14 @@ namespace KopiLua
 
 		#if LUA_COMPAT_GETN
 
-		static int checkint (lua_State L, int topop) {
+		static int checkint (LuaState L, int topop) {
 		  int n = (lua_type(L, -1) == LUA_TNUMBER) ? lua_tointeger(L, -1) : -1;
 		  lua_pop(L, topop);
 		  return n;
 		}
 
 
-		static void getsizes (lua_State L) {
+		static void getsizes (LuaState L) {
 		  lua_getfield(L, LUA_REGISTRYINDEX, "LUA_SIZES");
 		  if (lua_isnil(L, -1)) {  /* no `size' table? */
 			lua_pop(L, 1);  /* remove nil */
@@ -417,7 +417,7 @@ namespace KopiLua
 		}
 
 
-		public static void luaL_setn (lua_State L, int t, int n) {
+		public static void luaL_setn (LuaState L, int t, int n) {
 		  t = abs_index(L, t);
 		  lua_pushliteral(L, "n");
 		  lua_rawget(L, t);
@@ -436,7 +436,7 @@ namespace KopiLua
 		}
 
 
-		public static int luaL_getn (lua_State L, int t) {
+		public static int luaL_getn (LuaState L, int t) {
 		  int n;
 		  t = abs_index(L, t);
 		  lua_pushliteral(L, "n");  /* try t.n */

@@ -37,7 +37,7 @@ namespace KopiLua
 		public const int ERRLIB			= 1;
 		public const int ERRFUNC		= 2;
 
-		//public static void setprogdir(lua_State L) { }
+		//public static void setprogdir(LuaState L) { }
 
 		public static void SetProgDir(LuaState L)
 		{
@@ -64,14 +64,14 @@ namespace KopiLua
 		}
 
 
-		static void *ll_load (lua_State L, readonly CharPtr path) {
+		static void *ll_load (LuaState L, readonly CharPtr path) {
 		  void *lib = dlopen(path, RTLD_NOW);
 		  if (lib == null) lua_pushstring(L, dlerror());
 		  return lib;
 		}
 
 
-		static lua_CFunction ll_sym (lua_State L, void *lib, readonly CharPtr sym) {
+		static lua_CFunction ll_sym (LuaState L, void *lib, readonly CharPtr sym) {
 		  lua_CFunction f = (lua_CFunction)dlsym(lib, sym);
 		  if (f == null) lua_pushstring(L, dlerror());
 		  return f;
@@ -93,7 +93,7 @@ namespace KopiLua
 
 		//#undef setprogdir
 
-		static void setprogdir (lua_State L) {
+		static void setprogdir (LuaState L) {
 		  char buff[MAX_PATH + 1];
 		  char *lb;
 		  DWORD nsize = sizeof(buff)/GetUnmanagedSize(typeof(char));
@@ -108,7 +108,7 @@ namespace KopiLua
 		}
 
 
-		static void pusherror (lua_State L) {
+		static void pusherror (LuaState L) {
 		  int error = GetLastError();
 		  char buffer[128];
 		  if (FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -123,14 +123,14 @@ namespace KopiLua
 		}
 
 
-		static void *ll_load (lua_State L, readonly CharPtr path) {
+		static void *ll_load (LuaState L, readonly CharPtr path) {
 		  HINSTANCE lib = LoadLibraryA(path);
 		  if (lib == null) pusherror(L);
 		  return lib;
 		}
 
 
-		static lua_CFunction ll_sym (lua_State L, void *lib, readonly CharPtr sym) {
+		static lua_CFunction ll_sym (LuaState L, void *lib, readonly CharPtr sym) {
 		  lua_CFunction f = (lua_CFunction)GetProcAddress((HINSTANCE)lib, sym);
 		  if (f == null) pusherror(L);
 		  return f;
@@ -155,7 +155,7 @@ namespace KopiLua
 		//#define POF	"_" LUA_POF
 
 
-		static void pusherror (lua_State L) {
+		static void pusherror (LuaState L) {
 		  CharPtr err_str;
 		  CharPtr err_file;
 		  NSLinkEditErrors err;
@@ -187,7 +187,7 @@ namespace KopiLua
 		}
 
 
-		static void *ll_load (lua_State L, readonly CharPtr path) {
+		static void *ll_load (LuaState L, readonly CharPtr path) {
 		  NSObjectFileImage img;
 		  NSObjectFileImageReturnCode ret;
 		  /* this would be a rare case, but prevents crashing if it happens */
@@ -208,7 +208,7 @@ namespace KopiLua
 		}
 
 
-		static lua_CFunction ll_sym (lua_State L, void *lib, readonly CharPtr sym) {
+		static lua_CFunction ll_sym (LuaState L, void *lib, readonly CharPtr sym) {
 		  NSSymbol nss = NSLookupSymbolInModule((NSModule)lib, sym);
 		  if (nss == null) {
 			lua_pushfstring(L, "symbol " + LUA_QS + " not found", sym);

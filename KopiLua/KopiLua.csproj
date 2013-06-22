@@ -55,7 +55,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugKopiLua|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\DebugKopiLua\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CATCH_EXCEPTIONS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CATCH_EXCEPTIONS;LUA_CORE</DefineConstants>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>

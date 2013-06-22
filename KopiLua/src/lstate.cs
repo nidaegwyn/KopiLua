@@ -428,7 +428,7 @@ namespace KopiLua
 
 
 		private static LuaState luaE_newthread (LuaState L) {
-		  //lua_State L1 = tostate(luaM_malloc(L, state_size(typeof(lua_State))));
+		  //LuaState L1 = tostate(luaM_malloc(L, state_size(typeof(LuaState))));
 		  LuaState L1 = LuaMNew<LuaState>(L);
 		  LuaCLink(L, obj2gco(L1), LUA_TTHREAD);
 		  preinit_state(L1, G(L));

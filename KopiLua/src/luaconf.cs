@@ -390,8 +390,8 @@ namespace KopiLua
 		** with Lua. A useful redefinition is to use assert.h.
 		*/
 		#if LUA_USE_APICHECK
-			public static void luai_apicheck(lua_State L, bool o)	{Debug.Assert(o);}
-			public static void luai_apicheck(lua_State L, int o) {Debug.Assert(o != 0);}
+			public static void luai_apicheck(LuaState L, bool o)	{Debug.Assert(o);}
+			public static void luai_apicheck(LuaState L, int o) {Debug.Assert(o != 0);}
 		#else
 			public static void luai_apicheck(LuaState L, bool o)	{}
 			public static void luai_apicheck(LuaState L, int o) { }
@@ -687,7 +687,7 @@ namespace KopiLua
 
 		//#else
 		///* default handling with long jumps */
-		//public static void LUAI_THROW(lua_State L, lua_longjmp c) { c.b(1); }
+		//public static void LUAI_THROW(LuaState L, lua_longjmp c) { c.b(1); }
 		//#define LUAI_TRY(L,c,a)	if (setjmp((c).b) == 0) { a }
 		//#define luai_jmpbuf	jmp_buf
 
@@ -775,8 +775,8 @@ namespace KopiLua
 
 
 		/*
-		@@ LUAI_EXTRASPACE allows you to add user-specific data in a lua_State
-		@* (the data goes just *before* the lua_State pointer).
+		@@ LUAI_EXTRASPACE allows you to add user-specific data in a LuaState
+		@* (the data goes just *before* the LuaState pointer).
 		** CHANGE (define) this if you really need that. This value must be
 		** a multiple of the maximum alignment required for your machine.
 		*/
