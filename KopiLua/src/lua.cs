@@ -15,6 +15,9 @@ namespace KopiLua
 	using LuaNumberType = Double;
 	using LuaIntegerType = System.Int32;
 
+	/* Functions to be called by the debuger in specific events */
+	public delegate void LuaHook(LuaState L, LuaDebug ar);
+
 	[CLSCompliantAttribute(true)]
 	public partial class Lua
 	{
@@ -278,24 +281,8 @@ namespace KopiLua
         public const int LUA_MASKLINE = (1 << LUA_HOOKLINE);
         public const int LUA_MASKCOUNT = (1 << LUA_HOOKCOUNT);
 
-		/* Functions to be called by the debuger in specific events */
-		public delegate void LuaHook(LuaState L, LuaDebug ar);
 
 
-		public class LuaDebug {
-		  public int event_;
-		  public CharPtr name;	/* (n) */
-		  public CharPtr namewhat;	/* (n) `global', `local', `field', `method' */
-		  public CharPtr what;	/* (S) `Lua', `C', `main', `tail' */
-		  public CharPtr source;	/* (S) */
-		  public int currentline;	/* (l) */
-		  public int nups;		/* (u) number of upvalues */
-		  public int linedefined;	/* (S) */
-		  public int lastlinedefined;	/* (S) */
-		  public CharPtr short_src = new char[LUA_IDSIZE]; /* (S) */
-		  /* private part */
-		  public int i_ci;  /* active function */
-		};
 
 		/* }====================================================================== */
 

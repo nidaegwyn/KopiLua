@@ -4,16 +4,6 @@ namespace KopiLua
 {
 	public partial class Lua
 	{
-		public struct LuaTag
-		{
-			public LuaTag (object tag): this ()
-			{
-				this.Tag = tag;
-			}
-			
-			public object Tag { get; set; }
-		}
-
 		private static object tag = 0;
 
 		public static void LuaPushStdCallCFunction (LuaState luaState, LuaNativeFunction function)

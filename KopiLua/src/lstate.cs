@@ -180,39 +180,7 @@ namespace KopiLua
 		};
 
 
-		/*
-		** `per thread' state
-		*/
-		public class LuaState : GCObject {
 
-		  public lu_byte status;
-		  public StkId top;  /* first free slot in the stack */
-		  public StkId base_;  /* base of current function */
-		  public GlobalState l_G;
-		  public CallInfo ci;  /* call info for current function */
-		  public InstructionPtr savedpc = new InstructionPtr();  /* `savedpc' of current function */
-		  public StkId stack_last;  /* last free slot in the stack */
-		  public StkId[] stack;  /* stack base */
-		  public CallInfo end_ci;  /* points after end of ci array*/
-		  public CallInfo[] base_ci;  /* array of CallInfo's */
-		  public int stacksize;
-		  public int size_ci;  /* size of array `base_ci' */
-          [CLSCompliantAttribute(false)]
-		  public ushort nCcalls;  /* number of nested C calls */
-          [CLSCompliantAttribute(false)]
-		  public ushort baseCcalls;  /* nested C calls when resuming coroutine */
-		  public lu_byte hookmask;
-		  public lu_byte allowhook;
-		  public int basehookcount;
-		  public int hookcount;
-		  public LuaHook hook;
-		  public TValue l_gt = new LuaTypeValue();  /* table of globals */
-		  public TValue env = new LuaTypeValue();  /* temporary place for environments */
-		  public GCObject openupval;  /* list of open upvalues in this stack */
-		  public GCObject gclist;
-		  public LuaLongJmp errorJmp;  /* current error recover point */
-		  public ptrdiff_t errfunc;  /* current error handling function (stack index) */
-		};
 
 
 		public static GlobalState G(LuaState L)	{return L.l_G;}
