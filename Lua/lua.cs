@@ -26,13 +26,13 @@ namespace KopiLua
 
 
 
-		static Lua.LuaState globalL = null;
+		static LuaState globalL = null;
 
-		static Lua.CharPtr progname = Lua.LUA_PROGNAME;
+		static CharPtr progname = Lua.LUA_PROGNAME;
 
 
 
-		static void lstop(Lua.LuaState L, Lua.LuaDebug ar)
+		static void lstop(LuaState L, LuaDebug ar)
 		{
 			Lua.LuaSetHook(L, null, 0, 0);
 			Lua.LuaLError(L, "interrupted!");
@@ -64,7 +64,7 @@ namespace KopiLua
 		}
 
 
-		static void l_message(Lua.CharPtr pname, Lua.CharPtr msg)
+		static void l_message(CharPtr pname, CharPtr msg)
 		{
 			if (pname != null) Lua.fprintf(Lua.stderr, "%s: ", pname);
 			Lua.fprintf(Lua.stderr, "%s\n", msg);
@@ -72,11 +72,11 @@ namespace KopiLua
 		}
 
 
-		static int report(Lua.LuaState L, int status)
+		static int report(LuaState L, int status)
 		{
 			if ((status!=0) && !Lua.LuaIsNil(L, -1))
 			{
-				Lua.CharPtr msg = Lua.LuaToString(L, -1);
+				CharPtr msg = Lua.LuaToString(L, -1);
 				if (msg == null) msg = "(error object is not a string)";
 				l_message(progname, msg);
 				Lua.LuaPop(L, 1);
@@ -85,7 +85,7 @@ namespace KopiLua
 		}
 
 
-		static int traceback(Lua.LuaState L)
+		static int traceback(LuaState L)
 		{
 			if (Lua.LuaIsString(L, 1)==0)  /* 'message' not a string? */
 				return 1;  /* keep it intact */
@@ -108,7 +108,7 @@ namespace KopiLua
 		}
 
 
-		static int docall(Lua.LuaState L, int narg, int clear)
+		static int docall(LuaState L, int narg, int clear)
 		{
 			int status;
 			int base_ = Lua.LuaGetTop(L) - narg;  /* function index */
@@ -130,7 +130,7 @@ namespace KopiLua
 		}
 
 
-		static int getargs(Lua.LuaState L, string[] argv, int n)
+		static int getargs(LuaState L, string[] argv, int n)
 		{
 			int narg;
 			int i;
@@ -149,21 +149,21 @@ namespace KopiLua
 		}
 
 
-		static int dofile(Lua.LuaState L, Lua.CharPtr name)
+		static int dofile(LuaState L, CharPtr name)
 		{
 			int status = (Lua.LuaLLoadFile(L, name)!=0) || (docall(L, 0, 1)!=0) ? 1 : 0;
 			return report(L, status);
 		}
 
 
-		static int dostring(Lua.LuaState L, Lua.CharPtr s, Lua.CharPtr name)
+		static int dostring(LuaState L, CharPtr s, CharPtr name)
 		{
 			int status = (Lua.LuaLLoadBuffer(L, s, (uint)Lua.strlen(s), name)!=0) || (docall(L, 0, 1)!=0) ? 1 : 0;
 			return report(L, status);
 		}
 
 
-		static int dolibrary(Lua.LuaState L, Lua.CharPtr name)
+		static int dolibrary(LuaState L, CharPtr name)
 		{
 			Lua.LuaGetGlobal(L, "require");
 			Lua.LuaPushString(L, name);
@@ -171,9 +171,9 @@ namespace KopiLua
 		}
 
 
-		static Lua.CharPtr get_prompt(Lua.LuaState L, int firstline)
+		static CharPtr get_prompt(LuaState L, int firstline)
 		{
-			Lua.CharPtr p;
+			CharPtr p;
 			Lua.LuaGetField(L, Lua.LUA_GLOBALSINDEX, (firstline!=0) ? "_PROMPT" : "_PROMPT2");
 			p = Lua.LuaToString(L, -1);
 			if (p == null) p = ((firstline!=0) ? Lua.LUA_PROMPT : Lua.LUA_PROMPT2);
@@ -182,13 +182,13 @@ namespace KopiLua
 		}
 
 
-		static int incomplete(Lua.LuaState L, int status)
+		static int incomplete(LuaState L, int status)
 		{
 			if (status == Lua.LUA_ERRSYNTAX)
 			{
 				uint lmsg;
-				Lua.CharPtr msg = Lua.LuaToLString(L, -1, out lmsg);
-				Lua.CharPtr tp = msg + lmsg - (Lua.strlen(Lua.LUA_QL("<eof>")));
+				CharPtr msg = Lua.LuaToLString(L, -1, out lmsg);
+				CharPtr tp = msg + lmsg - (Lua.strlen(Lua.LUA_QL("<eof>")));
 				if (Lua.strstr(msg, Lua.LUA_QL("<eof>")) == tp)
 				{
 					Lua.LuaPop(L, 1);
@@ -199,12 +199,12 @@ namespace KopiLua
 		}
 
 
-		static int pushline(Lua.LuaState L, int firstline)
+		static int pushline(LuaState L, int firstline)
 		{
-			Lua.CharPtr buffer = new char[Lua.LUA_MAXINPUT];
-			Lua.CharPtr b = new Lua.CharPtr(buffer);
+			CharPtr buffer = new char[Lua.LUA_MAXINPUT];
+			CharPtr b = new CharPtr(buffer);
 			int l;
-			Lua.CharPtr prmt = get_prompt(L, firstline);
+			CharPtr prmt = get_prompt(L, firstline);
 			if (!Lua.lua_readline(L, b, prmt))
 				return 0;  /* no input */
 			l = Lua.strlen(b);
@@ -219,7 +219,7 @@ namespace KopiLua
 		}
 
 
-		static int loadline(Lua.LuaState L)
+		static int loadline(LuaState L)
 		{
 			int status;
 			Lua.LuaSetTop(L, 0);
@@ -241,10 +241,10 @@ namespace KopiLua
 		}
 
 
-		static void dotty(Lua.LuaState L)
+		static void dotty(LuaState L)
 		{
 			int status;
-			Lua.CharPtr oldprogname = progname;
+			CharPtr oldprogname = progname;
 			progname = null;
 			while ((status = loadline(L)) != -1)
 			{
@@ -267,10 +267,10 @@ namespace KopiLua
 		}
 
 
-		static int handle_script(Lua.LuaState L, string[] argv, int n)
+		static int handle_script(LuaState L, string[] argv, int n)
 		{
 			int status;
-			Lua.CharPtr fname;
+			CharPtr fname;
 			int narg = getargs(L, argv, n);  /* collect arguments */
 			Lua.LuaSetGlobal(L, "arg");
 			fname = argv[n];
@@ -341,7 +341,7 @@ namespace KopiLua
 		}
 
 
-		static int runargs(Lua.LuaState L, string[] argv, int n)
+		static int runargs(LuaState L, string[] argv, int n)
 		{
 			int i;
 			for (i = 1; i < n; i++)
@@ -375,9 +375,9 @@ namespace KopiLua
 		}
 
 
-		static int handle_luainit(Lua.LuaState L)
+		static int handle_luainit(LuaState L)
 		{
-			Lua.CharPtr init = Lua.getenv(Lua.LUA_INIT);
+			CharPtr init = Lua.getenv(Lua.LUA_INIT);
 			if (init == null) return 0;  /* status OK */
 			else if (init[0] == '@')
 				return dofile(L, init + 1);
@@ -394,7 +394,7 @@ namespace KopiLua
 		};
 
 
-		static int pmain(Lua.LuaState L)
+		static int pmain(LuaState L)
 		{
 			Smain s = (Smain)Lua.LuaToUserData(L, 1);
 			string[] argv = s.argv;
@@ -446,7 +446,7 @@ namespace KopiLua
 
 			int status;
 			Smain s = new Smain();
-			Lua.LuaState L = Lua.LuaOpen();  /* create state */
+			LuaState L = Lua.LuaOpen();  /* create state */
 			if (L == null)
 			{
 				l_message(args[0], "cannot create state: not enough memory");

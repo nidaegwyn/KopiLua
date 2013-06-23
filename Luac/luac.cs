@@ -36,29 +36,29 @@ namespace KopiLua
 		//#include "lstring.h"
 		//#include "lundump.h"
 
-		static Lua.CharPtr PROGNAME = "luac";		/* default program name */
-		static Lua.CharPtr OUTPUT = PROGNAME + ".out"; /* default output file */
+		static CharPtr PROGNAME = "luac";		/* default program name */
+		static CharPtr OUTPUT = PROGNAME + ".out"; /* default output file */
 
 		static int listing=0;			/* list bytecodes? */
 		static int dumping=1;			/* dump bytecodes? */
 		static int stripping=0;			/* strip debug information? */
-		static Lua.CharPtr Output=OUTPUT;	/* default output file name */
-		static Lua.CharPtr output=Output;	/* actual output file name */
-		static Lua.CharPtr progname=PROGNAME;	/* actual program name */
+		static CharPtr Output=OUTPUT;	/* default output file name */
+		static CharPtr output=Output;	/* actual output file name */
+		static CharPtr progname=PROGNAME;	/* actual program name */
 
-		static void fatal(Lua.CharPtr message)
+		static void fatal(CharPtr message)
 		{
 		 Lua.fprintf(Lua.stderr,"%s: %s\n",progname,message);
 		 Environment.Exit(Lua.EXIT_FAILURE);
 		}
 
-		static void cannot(Lua.CharPtr what)
+		static void cannot(CharPtr what)
 		{
 		 Lua.fprintf(Lua.stderr,"%s: cannot %s %s: %s\n",progname,what,output,Lua.strerror(Lua.errno()));
 		 Environment.Exit(Lua.EXIT_FAILURE);
 		}
 
-		static void usage(Lua.CharPtr message)
+		static void usage(CharPtr message)
 		{
 		 if (message[0]=='-')
 		  Lua.fprintf(Lua.stderr,"%s: unrecognized option " + Lua.LUA_QS + "\n",progname,message);
@@ -127,9 +127,9 @@ namespace KopiLua
 		 return i;
 		}
 
-		static Lua.Proto toproto(Lua.LuaState L, int i) {return Lua.CLValue(L.top+(i)).l.p;}
+		static Lua.Proto toproto(LuaState L, int i) {return Lua.CLValue(L.top+(i)).l.p;}
 
-		static Lua.Proto combine(Lua.LuaState L, int n)
+		static Lua.Proto combine(LuaState L, int n)
 		{
 		 if (n==1)
 		  return toproto(L,-1);
@@ -157,7 +157,7 @@ namespace KopiLua
 		 }
 		}
 
-		static int writer(Lua.LuaState L, Lua.CharPtr p, uint size, object u)
+		static int writer(LuaState L, CharPtr p, uint size, object u)
 		{
 		 //UNUSED(L);
 		 return ((Lua.fwrite(p,(int)size,1,(Stream)u)!=1) && (size!=0)) ? 1 : 0;
@@ -168,7 +168,7 @@ namespace KopiLua
 		 public string[] argv;
 		};
 
-		static int pmain(Lua.LuaState L)
+		static int pmain(LuaState L)
 		{
 		 Smain s = (Smain)Lua.LuaToUserData(L, 1);
 		 int argc=s.argc;
@@ -178,7 +178,7 @@ namespace KopiLua
 		 if (Lua.LuaCheckStack(L,argc)==0) fatal("too many input files");
 		 for (i=0; i<argc; i++)
 		 {
-		  Lua.CharPtr filename=(Lua.strcmp(argv[i], "-")==0) ? null : argv[i];
+		  CharPtr filename=(Lua.strcmp(argv[i], "-")==0) ? null : argv[i];
 		  if (Lua.LuaLLoadFile(L,filename)!=0) fatal(Lua.LuaToString(L,-1));
 		 }
 		 f=combine(L,argc);
@@ -205,7 +205,7 @@ namespace KopiLua
 		 newargs.Insert(0, Assembly.GetExecutingAssembly().Location);
 		 args = (string[])newargs.ToArray();
 
-		 Lua.LuaState L;
+		 LuaState L;
 		 Smain s = new Smain();
 		 int argc = args.Length;
 		 int i=doargs(argc,args);

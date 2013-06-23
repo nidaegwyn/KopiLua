@@ -95,6 +95,18 @@
     <Compile Include="..\KopiLua\src\lzio.cs" />
     <Compile Include="..\KopiLua\src\print.cs" />
     <Compile Include="..\KopiLua\src\printf\Tools.cs" />
+    <Compile Include="..\KopiLua\src\CharPtr.cs">
+      <Link>CharPtr.cs</Link>
+    </Compile>
+    <Compile Include="..\KopiLua\src\LuaDebug.cs">
+      <Link>LuaDebug.cs</Link>
+    </Compile>
+    <Compile Include="..\KopiLua\src\LuaState.cs">
+      <Link>LuaState.cs</Link>
+    </Compile>
+    <Compile Include="..\KopiLua\src\LuaTag.cs">
+      <Link>LuaTag.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

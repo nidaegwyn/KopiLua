@@ -18,6 +18,8 @@ namespace KopiLua
 	/* Functions to be called by the debuger in specific events */
 	public delegate void LuaHook(LuaState L, LuaDebug ar);
 
+	public delegate int LuaNativeFunction(LuaState L);
+
 	[CLSCompliantAttribute(true)]
 	public partial class Lua
 	{
@@ -78,7 +80,7 @@ namespace KopiLua
 		public const int LUA_ERRERR	= 5;
 
 
-		public delegate int LuaNativeFunction(LuaState L);
+
 
 
 		/*

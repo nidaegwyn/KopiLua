@@ -9,7 +9,7 @@ namespace Tests.iOS
 	[TestFixture]
 	public class core
 	{
-		Lua.LuaState state;
+		LuaState state;
 		string GetTestPath(string name)
 		{
 			string filePath = Path.Combine (Path.Combine ("LuaTests", "core"), name + ".lua");
@@ -23,7 +23,7 @@ namespace Tests.iOS
 			int result = Lua.LuaLLoadFile(state, path);
 
 			if (result != 0) {
-				Lua.CharPtr pstring = Lua.LuaToString (state, 1);
+				CharPtr pstring = Lua.LuaToString (state, 1);
 				if (pstring != null)
 					error = pstring.ToString();
 			}
@@ -33,7 +33,7 @@ namespace Tests.iOS
 			result = Lua.LuaPCall(state, 0, -1, 0);
 
 			if (result != 0) {
-				Lua.CharPtr pstring = Lua.LuaToString(state, 1);
+				CharPtr pstring = Lua.LuaToString(state, 1);
 				if (pstring != null)
 					error = pstring.ToString();
 			}
