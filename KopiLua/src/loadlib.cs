@@ -41,7 +41,30 @@ namespace KopiLua
 
 		public static void SetProgDir(LuaState L)
 		{
-			CharPtr buff = Directory.GetCurrentDirectory();
+			#if WINDOWS_PHONE
+			// On Windows Phone, the current directory is the root of the 
+			// Isolated Storage directory, which is "/".
+
+			CharPtr buff = "/";
+
+			#elif SILVERLIGHT
+			// Not all versions of Silverlight support this method.
+			// So, if it is unsupported, rollback to the Isolated
+			// Storage root (a.k.a. the leap of faith).
+
+			CharPtr buff;
+			try
+			{
+				buff = Directory.GetCurrentDirectory(); 
+			}
+			catch (MethodAccessException)
+			{
+				buff = "/";
+			}
+			#else
+				CharPtr buff = Directory.GetCurrentDirectory(); 
+			#endif
+
 			LuaLGSub(L, LuaToString(L, -1), LUA_EXECDIR, buff);
 			LuaRemove(L, -2);  /* remove original string */
 		}
