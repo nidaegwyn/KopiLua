@@ -65,24 +65,24 @@ namespace KopiLua
 #if lua_assert
 
 		[Conditional("DEBUG")]
-		internal static void LuaAssert(bool c) {Debug.Assert(c);}
+		public static void LuaAssert(bool c) {Debug.Assert(c);}
 
 		[Conditional("DEBUG")]
-		internal static void LuaAssert(int c) { Debug.Assert(c != 0); }
+		public static void LuaAssert(int c) { Debug.Assert(c != 0); }
 
 		internal static object CheckExp(bool c, object e)		{LuaAssert(c); return e;}
-		internal static object CheckExp(int c, object e) { LuaAssert(c != 0); return e; }
+		public static object CheckExp(int c, object e) { LuaAssert(c != 0); return e; }
 
 #else
 
 		[Conditional("DEBUG")]
-		internal static void LuaAssert(bool c) { }
+		public static void LuaAssert (bool c) { }
 
 		[Conditional("DEBUG")]
-		internal static void LuaAssert(int c) { }
+		public static void LuaAssert (int c) { }
 
-		internal static object CheckExp(bool c, object e) { return e; }
-		internal static object CheckExp(int c, object e) { return e; }
+		public static object CheckExp (bool c, object e) { return e; }
+		public static object CheckExp (int c, object e) { return e; }
 
 #endif
 
