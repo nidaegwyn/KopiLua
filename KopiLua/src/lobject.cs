@@ -12,7 +12,6 @@ using System.Diagnostics;
 
 namespace KopiLua
 {
-	using TValue = Lua.LuaTypeValue;
 	using StkId = Lua.LuaTypeValue;
 	using LuaByteType = System.Byte;
 	using LuaNumberType = System.Double;
@@ -71,7 +70,7 @@ namespace KopiLua
 			// in the original code Value is a struct, so all assignments in the code
 			// need to be replaced with a call to Copy. as it turns out, there are only
 			// a couple. the vast majority of references to Value are the instance that
-			// appears in the TValue class, so if you make that a virtual data member and
+			// appears in the Lua.LuaTypeValue class, so if you make that a virtual data member and
 			// omit the set accessor then you'll get a compiler error if anything tries
 			// to set it.
 			public void Copy(Value copy)
@@ -239,127 +238,127 @@ namespace KopiLua
                   case LUA_TLIGHTUSERDATA: typename = "LUA_TLIGHTUSERDATA"; break;
                   default: typename = "unknown"; break;
               }
-              return string.Format("TValue<{0}>({1})", typename, val);
+              return string.Format("Lua.LuaTypeValue<{0}>({1})", typename, val);
           }
         };
 
 		/* Macros to test type */
-		internal static bool TTIsNil(TValue o) { return (TType(o) == LUA_TNIL); }
-		internal static bool TTIsNumber(TValue o)	{return (TType(o) == LUA_TNUMBER);}
-		internal static bool TTIsString(TValue o)	{return (TType(o) == LUA_TSTRING);}
-		internal static bool TTIsTable(TValue o)	{return (TType(o) == LUA_TTABLE);}
-		internal static bool TTIsFunction(TValue o)	{return (TType(o) == LUA_TFUNCTION);}
-		internal static bool TTIsBoolean(TValue o) { return (TType(o) == LUA_TBOOLEAN); }
-		internal static bool TTIsUserData(TValue o) { return (TType(o) == LUA_TUSERDATA); }
-		internal static bool TTIsThread(TValue o)	{return (TType(o) == LUA_TTHREAD);}
-		internal static bool TTIsLightUserData(TValue o) { return (TType(o) == LUA_TLIGHTUSERDATA); }
+		internal static bool TTIsNil(Lua.LuaTypeValue o) { return (TType(o) == LUA_TNIL); }
+		internal static bool TTIsNumber(Lua.LuaTypeValue o)	{return (TType(o) == LUA_TNUMBER);}
+		internal static bool TTIsString(Lua.LuaTypeValue o)	{return (TType(o) == LUA_TSTRING);}
+		internal static bool TTIsTable(Lua.LuaTypeValue o)	{return (TType(o) == LUA_TTABLE);}
+		internal static bool TTIsFunction(Lua.LuaTypeValue o)	{return (TType(o) == LUA_TFUNCTION);}
+		internal static bool TTIsBoolean(Lua.LuaTypeValue o) { return (TType(o) == LUA_TBOOLEAN); }
+		internal static bool TTIsUserData(Lua.LuaTypeValue o) { return (TType(o) == LUA_TUSERDATA); }
+		internal static bool TTIsThread(Lua.LuaTypeValue o)	{return (TType(o) == LUA_TTHREAD);}
+		internal static bool TTIsLightUserData(Lua.LuaTypeValue o) { return (TType(o) == LUA_TLIGHTUSERDATA); }
 
 		/* Macros to access values */
 #if DEBUG
-		internal static int TType(TValue o) { return o.tt; }
+		internal static int TType(Lua.LuaTypeValue o) { return o.tt; }
 		internal static int TType(CommonHeader o) { return o.tt; }
-		internal static GCObject GCValue(TValue o) { return (GCObject)CheckExp(IsCollectable(o), o.value.gc); }
-		internal static object PValue(TValue o) { return (object)CheckExp(TTIsLightUserData(o), o.value.p); }
-		internal static LuaNumberType NValue(TValue o) { return (LuaNumberType)CheckExp(TTIsNumber(o), o.value.n); }
-		internal static TString RawTSValue(TValue o) { return (TString)CheckExp(TTIsString(o), o.value.gc.ts); }
-		internal static TStringTSV TSValue(TValue o) { return RawTSValue(o).tsv; }
-		internal static Udata RawUValue(TValue o) { return (Udata)CheckExp(TTIsUserData(o), o.value.gc.u); }
-		internal static UdataUV UValue(TValue o) { return RawUValue(o).uv; }
-		internal static Closure CLValue(TValue o) { return (Closure)CheckExp(TTIsFunction(o), o.value.gc.cl); }
-		internal static Table HValue(TValue o) { return (Table)CheckExp(TTIsTable(o), o.value.gc.h); }
-		internal static int BValue(TValue o) { return (int)CheckExp(TTIsBoolean(o), o.value.b); }
-		internal static LuaState THValue(TValue o) { return (LuaState)CheckExp(TTIsThread(o), o.value.gc.th); }
+		internal static GCObject GCValue(Lua.LuaTypeValue o) { return (GCObject)CheckExp(IsCollectable(o), o.value.gc); }
+		internal static object PValue(Lua.LuaTypeValue o) { return (object)CheckExp(TTIsLightUserData(o), o.value.p); }
+		internal static LuaNumberType NValue(Lua.LuaTypeValue o) { return (LuaNumberType)CheckExp(TTIsNumber(o), o.value.n); }
+		internal static TString RawTSValue(Lua.LuaTypeValue o) { return (TString)CheckExp(TTIsString(o), o.value.gc.ts); }
+		internal static TStringTSV TSValue(Lua.LuaTypeValue o) { return RawTSValue(o).tsv; }
+		internal static Udata RawUValue(Lua.LuaTypeValue o) { return (Udata)CheckExp(TTIsUserData(o), o.value.gc.u); }
+		internal static UdataUV UValue(Lua.LuaTypeValue o) { return RawUValue(o).uv; }
+		internal static Closure CLValue(Lua.LuaTypeValue o) { return (Closure)CheckExp(TTIsFunction(o), o.value.gc.cl); }
+		internal static Table HValue(Lua.LuaTypeValue o) { return (Table)CheckExp(TTIsTable(o), o.value.gc.h); }
+		internal static int BValue(Lua.LuaTypeValue o) { return (int)CheckExp(TTIsBoolean(o), o.value.b); }
+		internal static LuaState THValue(Lua.LuaTypeValue o) { return (LuaState)CheckExp(TTIsThread(o), o.value.gc.th); }
 #else
-		internal static int TType(TValue o) { return o.tt; }
+		internal static int TType(Lua.LuaTypeValue o) { return o.tt; }
 		internal static int TType(CommonHeader o) { return o.tt; }
-		internal static GCObject GCValue(TValue o) { return o.value.gc; }
-		internal static object PValue(TValue o) { return o.value.p; }
-		internal static LuaNumberType NValue(TValue o) { return o.value.n; }
-		internal static TString RawTSValue(TValue o) { return o.value.gc.ts; }
-		internal static TStringTSV TSValue(TValue o) { return RawTSValue(o).tsv; }
-		internal static Udata RawUValue(TValue o) { return o.value.gc.u; }
-		internal static UdataUV UValue(TValue o) { return RawUValue(o).uv; }
-		internal static Closure CLValue(TValue o) { return o.value.gc.cl; }
-		internal static Table HValue(TValue o) { return o.value.gc.h; }
-		internal static int BValue(TValue o) { return o.value.b; }
-		internal static LuaState THValue(TValue o) { return (LuaState)CheckExp(TTIsThread(o), o.value.gc.th); }
+		internal static GCObject GCValue(Lua.LuaTypeValue o) { return o.value.gc; }
+		internal static object PValue(Lua.LuaTypeValue o) { return o.value.p; }
+		internal static LuaNumberType NValue(Lua.LuaTypeValue o) { return o.value.n; }
+		internal static TString RawTSValue(Lua.LuaTypeValue o) { return o.value.gc.ts; }
+		internal static TStringTSV TSValue(Lua.LuaTypeValue o) { return RawTSValue(o).tsv; }
+		internal static Udata RawUValue(Lua.LuaTypeValue o) { return o.value.gc.u; }
+		internal static UdataUV UValue(Lua.LuaTypeValue o) { return RawUValue(o).uv; }
+		internal static Closure CLValue(Lua.LuaTypeValue o) { return o.value.gc.cl; }
+		internal static Table HValue(Lua.LuaTypeValue o) { return o.value.gc.h; }
+		internal static int BValue(Lua.LuaTypeValue o) { return o.value.b; }
+		internal static LuaState THValue(Lua.LuaTypeValue o) { return (LuaState)CheckExp(TTIsThread(o), o.value.gc.th); }
 #endif
 
-		public static int LIsFalse(TValue o) { return ((TTIsNil(o) || (TTIsBoolean(o) && BValue(o) == 0))) ? 1 : 0; }
+		public static int LIsFalse(Lua.LuaTypeValue o) { return ((TTIsNil(o) || (TTIsBoolean(o) && BValue(o) == 0))) ? 1 : 0; }
 
 		/*
 		** for internal debug only
 		*/
 		[Conditional("DEBUG")]
-		internal static void CheckConsistency(TValue obj)
+		internal static void CheckConsistency(Lua.LuaTypeValue obj)
 		{
 			LuaAssert(!IsCollectable(obj) || (TType(obj) == (obj).value.gc.gch.tt));
 		}
 
 		[Conditional("DEBUG")]
-		internal static void CheckLiveness(GlobalState g, TValue obj)
+		internal static void CheckLiveness(GlobalState g, Lua.LuaTypeValue obj)
 		{
 			LuaAssert(!IsCollectable(obj) ||
 			((TType(obj) == obj.value.gc.gch.tt) && !IsDead(g, obj.value.gc)));
 		}
 		
 		/* Macros to set values */
-		internal static void SetNilValue(TValue obj) {
+		internal static void SetNilValue(Lua.LuaTypeValue obj) {
 			obj.tt=LUA_TNIL;
 		}
 
-		internal static void SetNValue(TValue obj, LuaNumberType x) {
+		internal static void SetNValue(Lua.LuaTypeValue obj, LuaNumberType x) {
 			obj.value.n = x;
 			obj.tt = LUA_TNUMBER;
 		}
 
-		internal static void SetPValue( TValue obj, object x) {
+		internal static void SetPValue( Lua.LuaTypeValue obj, object x) {
 			obj.value.p = x;
 			obj.tt = LUA_TLIGHTUSERDATA;
 		}
 
-		internal static void SetBValue(TValue obj, int x) {
+		internal static void SetBValue(Lua.LuaTypeValue obj, int x) {
 			obj.value.b = x;
 			obj.tt = LUA_TBOOLEAN;
 		}
 
-		internal static void SetSValue(LuaState L, TValue obj, GCObject x) {
+		internal static void SetSValue(LuaState L, Lua.LuaTypeValue obj, GCObject x) {
 			obj.value.gc = x;
 			obj.tt = LUA_TSTRING;
 			CheckLiveness(G(L), obj);
 		}
 
-		internal static void SetUValue(LuaState L, TValue obj, GCObject x) {
+		internal static void SetUValue(LuaState L, Lua.LuaTypeValue obj, GCObject x) {
 			obj.value.gc = x;
 			obj.tt = LUA_TUSERDATA;
 			CheckLiveness(G(L), obj);
 		}
 
-		internal static void SetTTHValue(LuaState L, TValue obj, GCObject x) {
+		internal static void SetTTHValue(LuaState L, Lua.LuaTypeValue obj, GCObject x) {
 			obj.value.gc = x;
 			obj.tt = LUA_TTHREAD;
 			CheckLiveness(G(L), obj);
 		}
 
-		internal static void SetCLValue(LuaState L, TValue obj, Closure x) {
+		internal static void SetCLValue(LuaState L, Lua.LuaTypeValue obj, Closure x) {
 			obj.value.gc = x;
 			obj.tt = LUA_TFUNCTION;
 			CheckLiveness(G(L), obj);
 		}
 
-		internal static void SetHValue(LuaState L, TValue obj, Table x) {
+		internal static void SetHValue(LuaState L, Lua.LuaTypeValue obj, Table x) {
 			obj.value.gc = x;
 			obj.tt = LUA_TTABLE;
 			CheckLiveness(G(L), obj);
 		}
 
-		internal static void SetPTValue(LuaState L, TValue obj, Proto x) {
+		internal static void SetPTValue(LuaState L, Lua.LuaTypeValue obj, Proto x) {
 			obj.value.gc = x;
 			obj.tt = LUATPROTO;
 			CheckLiveness(G(L), obj);
 		}
 
-		internal static void SetObj(LuaState L, TValue obj1, TValue obj2) {
+		internal static void SetObj(LuaState L, Lua.LuaTypeValue obj1, Lua.LuaTypeValue obj2) {
 			obj1.value.Copy(obj2.value);
 			obj1.tt = obj2.tt;
 			CheckLiveness(G(L), obj1);
@@ -372,44 +371,44 @@ namespace KopiLua
 
 		/* from stack to (same) stack */
 		//#define setobjs2s	setobj
-		internal static void SetObjs2S(LuaState L, TValue obj, TValue x) { SetObj(L, obj, x); }
+		internal static void SetObjs2S(LuaState L, Lua.LuaTypeValue obj, Lua.LuaTypeValue x) { SetObj(L, obj, x); }
 		///* to stack (not from same stack) */
 		
 		//#define setobj2s	setobj
-		internal static void SetObj2S(LuaState L, TValue obj, TValue x) { SetObj(L, obj, x); }
+		internal static void SetObj2S(LuaState L, Lua.LuaTypeValue obj, Lua.LuaTypeValue x) { SetObj(L, obj, x); }
 
 		//#define setsvalue2s	setsvalue
-		internal static void SetSValue2S(LuaState L, TValue obj, TString x) { SetSValue(L, obj, x); }
+		internal static void SetSValue2S(LuaState L, Lua.LuaTypeValue obj, TString x) { SetSValue(L, obj, x); }
 
 		//#define sethvalue2s	sethvalue
-		internal static void SetHValue2S(LuaState L, TValue obj, Table x) { SetHValue(L, obj, x); }
+		internal static void SetHValue2S(LuaState L, Lua.LuaTypeValue obj, Table x) { SetHValue(L, obj, x); }
 
 		//#define setptvalue2s	setptvalue
-		internal static void SetPTValue2S(LuaState L, TValue obj, Proto x) { SetPTValue(L, obj, x); }
+		internal static void SetPTValue2S(LuaState L, Lua.LuaTypeValue obj, Proto x) { SetPTValue(L, obj, x); }
 
 		///* from table to same table */
 		//#define setobjt2t	setobj
-		internal static void SetObjT2T(LuaState L, TValue obj, TValue x) { SetObj(L, obj, x); }
+		internal static void SetObjT2T(LuaState L, Lua.LuaTypeValue obj, Lua.LuaTypeValue x) { SetObj(L, obj, x); }
 
 		///* to table */
 		//#define setobj2t	setobj
-		internal static void SetObj2T(LuaState L, TValue obj, TValue x) { SetObj(L, obj, x); }
+		internal static void SetObj2T(LuaState L, Lua.LuaTypeValue obj, Lua.LuaTypeValue x) { SetObj(L, obj, x); }
 
 		///* to new object */
 		//#define setobj2n	setobj
-		internal static void SetObj2N(LuaState L, TValue obj, TValue x) { SetObj(L, obj, x); }
+		internal static void SetObj2N(LuaState L, Lua.LuaTypeValue obj, Lua.LuaTypeValue x) { SetObj(L, obj, x); }
 
 		//#define setsvalue2n	setsvalue
-		internal static void SetSValue2N(LuaState L, TValue obj, TString x) { SetSValue(L, obj, x); }
+		internal static void SetSValue2N(LuaState L, Lua.LuaTypeValue obj, TString x) { SetSValue(L, obj, x); }
 
-		internal static void SetTType(TValue obj, int tt) { obj.tt = tt; }
-
-
-		internal static bool IsCollectable(TValue o) { return (TType(o) >= LUA_TSTRING); }
+		internal static void SetTType(Lua.LuaTypeValue obj, int tt) { obj.tt = tt; }
 
 
+		internal static bool IsCollectable(Lua.LuaTypeValue o) { return (TType(o) >= LUA_TSTRING); }
 
-		//typedef TValue *StkId;  /* index to stack elements */
+
+
+		//typedef Lua.LuaTypeValue *StkId;  /* index to stack elements */
 		
 		/*
 		** String headers for string table
@@ -473,7 +472,7 @@ namespace KopiLua
 		  public int index = 0;
 		  public Proto this[int offset] {get { return this.protos[this.index + offset]; }}
 
-		  public TValue[] k;  /* constants used by the function */
+		  public Lua.LuaTypeValue[] k;  /* constants used by the function */
 			[CLSCompliantAttribute(false)]
 		  public Instruction[] code;
 		  public new Proto[] p;  /* functions defined inside the function */
@@ -515,10 +514,10 @@ namespace KopiLua
 		*/
 
 		public class UpVal : GCObject {
-		  public TValue v;  /* points to stack or to its own value */
+		  public Lua.LuaTypeValue v;  /* points to stack or to its own value */
 			[CLSCompliantAttribute(false)]
 			public class Uinternal {
-				public TValue value = new LuaTypeValue();  /* the value (when closed) */
+				public Lua.LuaTypeValue value = new LuaTypeValue();  /* the value (when closed) */
 				[CLSCompliantAttribute(false)]
 				public class _l {  /* double linked list (when open) */
 				  public UpVal prev;
@@ -559,7 +558,7 @@ namespace KopiLua
 		public class CClosure : ClosureType {
 			public CClosure(ClosureHeader header) : base(header) { }
 			public LuaNativeFunction f;
-			public TValue[] upvalue;
+			public Lua.LuaTypeValue[] upvalue;
 		};
 
 
@@ -582,15 +581,15 @@ namespace KopiLua
 		};
 
 
-		public static bool IsCFunction(TValue o) { return ((TType(o) == LUA_TFUNCTION) && (CLValue(o).c.isC != 0)); }
-		public static bool IsLfunction(TValue o) { return ((TType(o) == LUA_TFUNCTION) && (CLValue(o).c.isC==0)); }
+		public static bool IsCFunction(Lua.LuaTypeValue o) { return ((TType(o) == LUA_TFUNCTION) && (CLValue(o).c.isC != 0)); }
+		public static bool IsLfunction(Lua.LuaTypeValue o) { return ((TType(o) == LUA_TFUNCTION) && (CLValue(o).c.isC==0)); }
 
 
 		/*
 		** Tables
 		*/
 
-		public class TKeyNK : TValue
+		public class TKeyNK : Lua.LuaTypeValue
 		{
 			public TKeyNK() { }
 			public TKeyNK(Value value, int tt, Node next) : base(value, tt)
@@ -615,7 +614,7 @@ namespace KopiLua
 			}
 
 			public TKeyNK nk = new TKeyNK();
-			public TValue tvk { get { return this.nk; } }
+			public Lua.LuaTypeValue tvk { get { return this.nk; } }
 		};
 
 
@@ -649,7 +648,7 @@ namespace KopiLua
 				this.i_key = new TKey(copy.i_key);
 			}
 
-			public Node(TValue i_val, TKey i_key)
+			public Node(Lua.LuaTypeValue i_val, TKey i_key)
 			{
 				this.values = new Node[] { this };
 				this.index = 0;
@@ -657,7 +656,7 @@ namespace KopiLua
 				this.i_key = i_key;
 			}
 
-			public TValue i_val;
+			public Lua.LuaTypeValue i_val;
 			public TKey i_key;
 
 			[CLSCompliantAttribute(false)]
@@ -714,7 +713,7 @@ namespace KopiLua
 		  public LuaByteType flags;  /* 1<<p means tagmethod(p) is not present */ 
 		  public LuaByteType lsizenode;  /* log2 of size of `node' array */
 		  public Table metatable;
-		  public TValue[] array;  /* array part */
+		  public Lua.LuaTypeValue[] array;  /* array part */
 		  public Node[] node;
 		  public int lastfree;  /* any free position is before this position */
 		  public GCObject gclist;
@@ -733,8 +732,8 @@ namespace KopiLua
 		internal static int TwoTo(int x) { return 1 << x; }
 		internal static int SizeNode(Table t) { return TwoTo(t.lsizenode); }
 
-		public static TValue LuaONilObjectX = new LuaTypeValue(new Value(), LUA_TNIL);
-		public static TValue LuaONilObject = LuaONilObjectX;
+		public static Lua.LuaTypeValue LuaONilObjectX = new LuaTypeValue(new Value(), LUA_TNIL);
+		public static Lua.LuaTypeValue LuaONilObject = LuaONilObjectX;
 
 		public static int CeilLog2(int x)	{return LuaOLog2((uint)(x-1)) + 1;}
 	
@@ -785,7 +784,7 @@ namespace KopiLua
 		}
 
 
-		public static int LuaORawEqualObj (TValue t1, TValue t2) {
+		public static int LuaORawEqualObj (Lua.LuaTypeValue t1, Lua.LuaTypeValue t2) {
 		  if (TType(t1) != TType(t2)) return 0;
 		  else switch (TType(t1)) {
 			case LUA_TNIL:
