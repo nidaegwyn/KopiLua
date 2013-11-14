@@ -159,6 +159,8 @@ namespace KopiLua
 		[CLSCompliantAttribute (false)]
 		public static int LuaNetLoadBuffer (LuaState L, string buff, uint sz, string name)
 		{
+			if (sz == 0)
+				sz = (uint) strlen (buff);
 			return LuaLLoadBuffer (L, buff, sz, name);
 		}
 
