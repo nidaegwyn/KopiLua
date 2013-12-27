@@ -22,7 +22,7 @@ namespace KopiLua
 	{
 		public class DumpState {
 		 public LuaState L;
-         [CLSCompliantAttribute(false)]
+		 [CLSCompliantAttribute(false)]
 		 public lua_Writer writer;
 		 public object data;
 		 public int strip;
@@ -31,21 +31,68 @@ namespace KopiLua
 
 		public static void DumpMem(object b, DumpState D)
 		{
-#if XBOX || SILVERLIGHT
+#if XBOX
 			// todo: implement this - mjf
 			Debug.Assert(false);
+#endif
+
+#if SILVERLIGHT
+			// No support for Marshal.SizeOf in Silverlight, so we
+			// have to manually set the size. Size values are from
+			// Lua's 5.1 spec.
+
+			// No support for Marshal.StructureToPtr in Silverlight,
+			// let's use BitConverter instead!
+			
+			int size = 0;
+			byte[] bytes;
+			Type t = b.GetType();
+			if (t.Equals(typeof(UInt32)))
+			{
+				size = 4;
+				bytes = BitConverter.GetBytes((uint)b);
+			}
+			else if (t.Equals(typeof(Int32)))
+			{
+				size = 4;
+				bytes = BitConverter.GetBytes((int)b);
+			}
+			else if (t.Equals(typeof(Char)))
+			{
+				size = 1;
+				bytes = new byte[1] { BitConverter.GetBytes((char)b)[0] };
+			}
+			else if (t.Equals(typeof(Byte)))
+			{
+				size = 1;
+				bytes = new byte[1] { (byte)b };
+				//bytes = BitConverter.GetBytes((byte)b);
+			}
+			else if (t.Equals(typeof(Double)))
+			{
+				size = 8;
+				bytes = BitConverter.GetBytes((double)b);
+			}
+			else
+			{
+				throw new NotImplementedException("Invalid type: " + t.FullName);
+			}
+
 #else
 			int size = Marshal.SizeOf(b);
 			IntPtr ptr = Marshal.AllocHGlobal(size);
 			Marshal.StructureToPtr(b, ptr, false);
 			byte[] bytes = new byte[size];
 			Marshal.Copy(ptr, bytes, 0, size);
+#endif
 			char[] ch = new char[bytes.Length];
 			for (int i = 0; i < bytes.Length; i++)
 				ch[i] = (char)bytes[i];
 			CharPtr str = ch;
 			DumpBlock(str, (uint)str.chars.Length, D);
-			Marshal.Release(ptr);
+
+#if !SILVERLIGHT
+			Marshal.Release(ptr); 
 #endif
 		}
 
