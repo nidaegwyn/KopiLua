@@ -76,6 +76,7 @@ namespace KopiLua
 			public lua_Reader reader;
 			public object data;			/* additional data */
 			public LuaState L;			/* Lua state (for reader) */
+			public int eoz;
 		};
 
 
@@ -83,10 +84,14 @@ namespace KopiLua
 		  uint size;
 		  LuaState L = z.L;
 		  CharPtr buff;
+		  if (z.eoz != 0) return EOZ;
 		  LuaUnlock(L);
 		  buff = z.reader(L, z.data, out size);
 		  LuaLock(L);
-		  if (buff == null || size == 0) return EOZ;
+		  if (buff == null || size == 0) {
+		    z.eoz = 1;  /* avoid calling reader function next time */
+		    return EOZ;
+		  }
 		  z.n = size - 1;
 		  z.p = new CharPtr(buff);
 		  int result = char2int(z.p[0]);
@@ -115,6 +120,7 @@ namespace KopiLua
 		  z.data = data;
 		  z.n = 0;
 		  z.p = null;
+		  z.eoz = 0;
 		}
 
 
