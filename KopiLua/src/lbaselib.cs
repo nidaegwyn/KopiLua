@@ -639,6 +639,9 @@ namespace KopiLua
 		  LuaSetField(L, -2, "__mode");  /* metatable(w).__mode = "kv" */
 		  LuaPushCClosure(L, LuaBNewProxy, 1);
 		  LuaSetGlobal(L, "newproxy");  /* set global `newproxy' */
+		  /** KopiLua Hack - Add L state to registry to get inside coroutine ***/
+		  LuaPushThread (L);
+		  LuaSetField (L, LUA_REGISTRYINDEX, "main_state");
 		}
 
 

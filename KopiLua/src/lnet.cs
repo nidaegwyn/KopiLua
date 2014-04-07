@@ -190,6 +190,14 @@ namespace KopiLua
 		{
 			LuaPushLString (L, s, len);
 		}
+
+		public static LuaState LuaNetGetMainState (LuaState L1)
+		{
+			LuaGetField (L1, LUA_REGISTRYINDEX, "main_state");
+			LuaState main = LuaToThread (L1, -1);
+			LuaPop (L1, 1);
+			return main;
+		}
 	}
 }
 
