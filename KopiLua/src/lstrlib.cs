@@ -186,6 +186,7 @@ namespace KopiLua
 				  capture[i] = new capture_();
 		  }
 
+		  public int matchdepth; /* control for recursive depth (to avoid C stack overflow) */
 		  public CharPtr src_init;  /* init of source string */
 		  public CharPtr src_end;  /* end (`\0') of source string */
 		  public LuaState L;
@@ -199,6 +200,7 @@ namespace KopiLua
 		};
 
 
+		public const int MAXCCALLS = 200;
 		public const char L_ESC		= '%';
 		public const string SPECIALS = "^$*+?.([%-";
 
@@ -206,7 +208,7 @@ namespace KopiLua
 		private static int check_capture (MatchState ms, int l) {
 		  l -= '1';
 		  if (l < 0 || l >= ms.level || ms.capture[l].len == CAP_UNFINISHED)
-			return LuaLError(ms.L, "invalid capture index");
+			return LuaLError(ms.L, "invalid capture index %%%d", l + 1);
 		  return l;
 		}
 
@@ -388,6 +390,8 @@ namespace KopiLua
 		private static CharPtr match (MatchState ms, CharPtr s, CharPtr p) {
 		  s = new CharPtr(s);
 		  p = new CharPtr(p);
+		  if (ms.matchdepth-- == 0)
+			  LuaLError(ms.L, "pattern too complex");
 		  init: /* using goto's to optimize tail recursion */
 		  switch (p[0]) {
 			case '(': {  /* start capture */
@@ -570,11 +574,13 @@ namespace KopiLua
 			}
 			CharPtr s1=s+init;
 			ms.L = L;
+			ms.matchdepth = MAXCCALLS;
 			ms.src_init = s;
 			ms.src_end = s+l1;
 			do {
 			  CharPtr res;
 			  ms.level = 0;
+			  LuaAssert(ms.matchdepth == MAXCCALLS);
 			  if ((res=match(ms, s1, p)) != null) {
 				if (find != 0) {
 				  LuaPushInteger(L, s1-s+1);  /* start */
@@ -608,6 +614,7 @@ namespace KopiLua
 		  CharPtr p = LuaToString(L, LuaUpValueIndex(2));
 		  CharPtr src;
 		  ms.L = L;
+		  ms.matchdepth = MAXCCALLS;
 		  ms.src_init = s;
 		  ms.src_end = s+ls;
 		  for (src = s + (uint)LuaToInteger(L, LuaUpValueIndex(3));
@@ -615,6 +622,7 @@ namespace KopiLua
 			   src = src.next()) {
 			CharPtr e;
 			ms.level = 0;
+			LuaAssert(ms.matchdepth == MAXCCALLS);
 			if ((e = match(ms, src, p)) != null) {
 			  lua_Integer newstart = e-s;
 			  if (e == src) newstart++;  /* empty match? go at least one position */
@@ -719,11 +727,13 @@ namespace KopiLua
 							  "string/function/table expected");
 		  LuaLBuffInit(L, b);
 		  ms.L = L;
+		  ms.matchdepth = MAXCCALLS;
 		  ms.src_init = src;
 		  ms.src_end = src+srcl;
 		  while (n < max_s) {
 			CharPtr e;
 			ms.level = 0;
+			LuaAssert(ms.matchdepth == MAXCCALLS);
 			e = match(ms, src, p);
 			if (e != null) {
 			  n++;
