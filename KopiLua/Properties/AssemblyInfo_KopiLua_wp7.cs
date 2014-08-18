@@ -9,9 +9,9 @@ using System.Resources;
 [assembly: AssemblyTitle("KopiLua_wp7")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MICROSOFT")]
+[assembly: AssemblyCompany("Microsoft")]
 [assembly: AssemblyProduct("KopiLua_wp7")]
-[assembly: AssemblyCopyright("Copyright © 2012 Gerasimov Sergey")]
+[assembly: AssemblyCopyright("Copyright © 2014 Gerasimov Sergey")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
