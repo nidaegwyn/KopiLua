@@ -3,6 +3,9 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Globalization;
+
+
 #endregion
 
 namespace AT.MIN
@@ -662,7 +665,7 @@ namespace AT.MIN
 
 			if ( IsNumericType( Value ) )
 			{
-				w = String.Format( numberFormat, Value );
+				w = String.Format(CultureInfo.InvariantCulture,  numberFormat, Value );
 
 				if ( Left2Right || Padding == ' ' )
 				{
