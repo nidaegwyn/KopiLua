@@ -11,7 +11,6 @@
     <FileAlignment>512</FileAlignment>
     <ReleaseVersion>1.0</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
@@ -58,5 +57,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KopiLua\KopiLua.Net40.csproj">
+      <Project>{E8DDBC21-EF74-4ABA-9C49-BFC702BE25D8}</Project>
+      <Name>KopiLua.Net40</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
