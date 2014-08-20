@@ -106,6 +106,8 @@ namespace KopiLua
 		public static int LuaNetRawNetObj (LuaState luaState, int obj)
 		{
 			byte[] bytes = LuaToUserData (luaState, obj) as byte[];
+			if (bytes == null)
+				return -1;
 			return FourBytesToInt (bytes);
 		}
 
