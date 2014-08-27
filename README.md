@@ -1,7 +1,7 @@
 KopiLua
 =================
 
-[![Build Status](https://travis-ci.org/NLua/KopiLua.png?branch=master)](https://travis-ci.org/NLua/KopiLua)
+[![Build Status](https://travis-ci.org/NLua/KopiLua.svg?branch=master)](https://travis-ci.org/NLua/KopiLua)
 
 * What is KopiLua?
  ------------
