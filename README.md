@@ -24,7 +24,8 @@ KopiLua
  links to sites containing specific information with regards to the
  licensing terms.
   
- * Installation
+
+* Installation
  --------------
  Kopi Lua is implemented in C# and has been tested on Microsoft Visual Studio 2012 
  Professional. In order for Kopi Lua to successfully compile the following
@@ -32,7 +33,7 @@ KopiLua
   
  LUA_CORE;LUA_COMPAT_VARARG;LUA_COMPAT_MOD;LUA_COMPAT_GFIND;CATCH_EXCEPTIONS
   
- * Contact/Bug Reports etc
+* Contact/Bug Reports etc
  -------------------------
  Please report all bugs and issues to Vinicius Jarina/viniciusjarina (mailto:viniciusjarina@gmail.com)
  (Old: Please report all bugs and issues to Mark Feldman (mailto:lua@ppl-pilot.com))
