@@ -75,7 +75,7 @@ namespace KopiLua
 		}
 
 
-		public static int LuaGetStack (LuaState L, int level, LuaDebug ar) {
+		public static int LuaGetStack (LuaState L, int level, ref LuaDebug ar) {
 		  int status;
 		  CallInfo ci;
 		  LuaLock(L);
@@ -222,7 +222,7 @@ namespace KopiLua
 		}
 
 
-		public static int LuaGetInfo (LuaState L, CharPtr what, LuaDebug ar) {
+		public static int LuaGetInfo (LuaState L, CharPtr what, ref LuaDebug ar) {
 		  int status;
 		  Closure f = null;
 		  CallInfo ci = null;

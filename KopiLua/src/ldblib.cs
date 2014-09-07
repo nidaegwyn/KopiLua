@@ -95,7 +95,7 @@ namespace KopiLua
 		  LuaState L1 = GetThread(L, out arg);
 		  CharPtr options = LuaLOptString(L, arg+2, "flnSu");
 		  if (LuaIsNumber(L, arg+1) != 0) {
-			if (LuaGetStack(L1, (int)LuaToInteger(L, arg+1), ar)==0) {
+			if (LuaGetStack(L1, (int)LuaToInteger(L, arg+1), ref ar)==0) {
 			  LuaPushNil(L);  /* level out of range */
 			  return 1;
 			}
@@ -108,7 +108,7 @@ namespace KopiLua
 		  }
 		  else
 			return LuaLArgError(L, arg+1, "function or level expected");
-		  if (LuaGetInfo(L1, options, ar)==0)
+		  if (LuaGetInfo(L1, options,ref ar)==0)
 			return LuaLArgError(L, arg+2, "invalid option");
 		  LuaCreateTable(L, 0, 2);
 		  if (strchr(options, 'S') != null) {
@@ -139,7 +139,7 @@ namespace KopiLua
 		  LuaState L1 = GetThread(L, out arg);
 		  LuaDebug ar = new LuaDebug();
 		  CharPtr name;
-		  if (LuaGetStack(L1, LuaLCheckInt(L, arg+1), ar)==0)  /* out of range? */
+		  if (LuaGetStack(L1, LuaLCheckInt(L, arg+1), ref ar)==0)  /* out of range? */
 			return LuaLArgError(L, arg+1, "level out of range");
 		  name = LuaGetLocal(L1, ar, LuaLCheckInt(L, arg+2));
 		  if (name != null) {
@@ -159,7 +159,7 @@ namespace KopiLua
 		  int arg;
 		  LuaState L1 = GetThread(L, out arg);
 		  LuaDebug ar = new LuaDebug();
-		  if (LuaGetStack(L1, LuaLCheckInt(L, arg+1), ar)==0)  /* out of range? */
+		  if (LuaGetStack(L1, LuaLCheckInt(L, arg+1), ref ar)==0)  /* out of range? */
 			return LuaLArgError(L, arg+1, "level out of range");
 		  LuaLCheckAny(L, arg+3);
 		  LuaSetTop(L, arg+3);
@@ -210,7 +210,7 @@ namespace KopiLua
 			if (ar.currentline >= 0)
 			  LuaPushInteger(L, ar.currentline);
 			else LuaPushNil(L);
-			LuaAssert(LuaGetInfo(L, "lS", ar));
+			LuaAssert(LuaGetInfo(L, "lS",ref ar));
 			LuaCall(L, 2, 0);
 		  }
 		}
@@ -330,21 +330,21 @@ namespace KopiLua
 		  else if (LuaIsString(L, arg+1)==0) return 1;  /* message is not a string */
 		  else LuaPushLiteral(L, "\n");
 		  LuaPushLiteral(L, "stack traceback:");
-		  while (LuaGetStack(L1, level++, ar) != 0) {
+		  while (LuaGetStack(L1, level++, ref ar) != 0) {
 			if (level > LEVELS1 && firstpart) {
 			  /* no more than `LEVELS2' more levels? */
-			  if (LuaGetStack(L1, level+LEVELS2, ar)==0)
+			  if (LuaGetStack(L1, level+LEVELS2, ref ar)==0)
 				level--;  /* keep going */
 			  else {
 				LuaPushLiteral(L, "\n\t...");  /* too many levels */
-				while (LuaGetStack(L1, level+LEVELS2, ar) != 0)  /* find last levels */
+				while (LuaGetStack(L1, level+LEVELS2, ref ar) != 0)  /* find last levels */
 				  level++;
 			  }
 			  firstpart = false;
 			  continue;
 			}
 			LuaPushLiteral(L, "\n\t");
-			LuaGetInfo(L1, "Snl", ar);
+			LuaGetInfo(L1, "Snl", ref ar);
 			LuaPushFString(L, "%s:", ar.short_src);
 			if (ar.currentline > 0)
 			  LuaPushFString(L, "%d:", ar.currentline);

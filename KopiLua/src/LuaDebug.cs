@@ -15,6 +15,10 @@ namespace KopiLua
 		public CharPtr short_src = new char[Lua.LUA_IDSIZE]; /* (S) */
 		/* private part */
 		public int i_ci;  /* active function */
+		public string shortsrc
+		{
+			get { return short_src.ToString (); }
+		}
 	};
 }
 

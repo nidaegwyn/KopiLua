@@ -112,9 +112,9 @@ namespace KopiLua
 			LuaDebug ar = new LuaDebug();
 			int level = (opt != 0) ? LuaLOptInt(L, 1, 1) : LuaLCheckInt(L, 1);
 			LuaLArgCheck(L, level >= 0, 1, "level must be non-negative");
-			if (LuaGetStack(L, level, ar) == 0)
+			if (LuaGetStack(L, level, ref ar) == 0)
 			  LuaLArgError(L, 1, "invalid level");
-			LuaGetInfo(L, "f", ar);
+			LuaGetInfo(L, "f", ref ar);
 			if (LuaIsNil(L, -1))
 			  LuaLError(L, "no function environment for tail call at level %d",
 							level);
@@ -491,7 +491,7 @@ namespace KopiLua
 			  return CO_SUS;
 			case 0: {
 			  LuaDebug ar = new LuaDebug();
-			  if (LuaGetStack(co, 0, ar) > 0)  /* does it have frames? */
+			  if (LuaGetStack(co, 0,ref ar) > 0)  /* does it have frames? */
 				return CO_NOR;  /* it is running */
 			  else if (LuaGetTop(co) == 0)
 				  return CO_DEAD;
