@@ -193,6 +193,12 @@ namespace KopiLua
 			LuaPushLString (L, s, len);
 		}
 
+		public static int LuaNetIsStringStrict (LuaState L, int idx)
+		{
+			int t = LuaType (L, idx);
+			return (t == LUA_TSTRING) ? 1 : 0;
+		}
+
 		public static LuaState LuaNetGetMainState (LuaState L1)
 		{
 			LuaGetField (L1, LUA_REGISTRYINDEX, "main_state");
