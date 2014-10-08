@@ -90,6 +90,7 @@
     <Compile Include="src\lzio.cs" />
     <Compile Include="src\print.cs" />
     <Compile Include="src\printf\Tools.cs" />
+    <Compile Include="src\Platform\CLSCompliantAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

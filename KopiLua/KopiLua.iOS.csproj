@@ -80,5 +80,6 @@
     <Compile Include="src\LuaDebug.cs" />
     <Compile Include="src\LuaState.cs" />
     <Compile Include="src\LuaTag.cs" />
+    <Compile Include="src\Platform\CLSCompliantAttribute.cs" />
   </ItemGroup>
 </Project>
