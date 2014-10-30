@@ -10,14 +10,14 @@ ASSEMBLY = ../tests/KopiLua.Tests.dll
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = library
 PROJECT_REFERENCES =  \
-	../Bin/Debug/KopiLua.dll
+	../Bin/Debug/net40/KopiLua.dll
 BUILD_DIR = ../tests/
 
 KOPILUA_TESTS_DLL_MDB_SOURCE=../tests/KopiLua.Tests.dll.mdb
 KOPILUA_TESTS_DLL_MDB=$(BUILD_DIR)/KopiLua.Tests.dll.mdb
-NUNIT_FRAMEWORK_DLL_SOURCE=../lib/nunit/nunit.framework.dll
-KOPILUA_DLL_SOURCE=../Bin/Debug/KopiLua.dll
-KOPILUA_DLL_MDB_SOURCE=../Bin/Debug/KopiLua.dll.mdb
+NUNIT_FRAMEWORK_DLL_SOURCE=../packages/NUnit.2.6.3/lib/nunit.framework.dll
+KOPILUA_DLL_SOURCE=../Bin/Debug/net40/KopiLua.dll
+KOPILUA_DLL_MDB_SOURCE=../Bin/Debug/net40/KopiLua.dll.mdb
 KOPILUA_DLL_MDB=$(BUILD_DIR)/KopiLua.dll.mdb
 
 endif
@@ -29,12 +29,12 @@ ASSEMBLY = ../tests/KopiLua.Tests.dll
 ASSEMBLY_MDB = 
 COMPILE_TARGET = library
 PROJECT_REFERENCES =  \
-	../Bin/Release/KopiLua.dll
+	../Bin/Release/net40/KopiLua.dll
 BUILD_DIR = ../tests/
 
 KOPILUA_TESTS_DLL_MDB=
-NUNIT_FRAMEWORK_DLL_SOURCE=../lib/nunit/nunit.framework.dll
-KOPILUA_DLL_SOURCE=../Bin/Release/KopiLua.dll
+NUNIT_FRAMEWORK_DLL_SOURCE=../packages/NUnit.2.6.3/lib/nunit.framework.dll
+KOPILUA_DLL_SOURCE=../Bin/Release/net40/KopiLua.dll
 KOPILUA_DLL_MDB=
 
 endif
@@ -49,7 +49,7 @@ PROGRAMFILES = \
 	$(KOPILUA_DLL_MDB)  
 
 LINUX_PKGCONFIG = \
-	$(KOPILUA_TESTS_PC)  
+	$(KOPILUA_TESTS_40_PC)  
 
 
 RESGEN=resgen2
@@ -57,16 +57,17 @@ RESGEN=resgen2
 all: $(ASSEMBLY) $(PROGRAMFILES) $(LINUX_PKGCONFIG) 
 
 FILES = \
-	../tests/core.cs 
+	../tests/core.cs \
+	Properties/AssemblyInfo.cs 
 
 DATA_FILES = 
 
 RESOURCES = 
 
 EXTRAS = \
-	packages.config \
 	Properties \
-	kopilua.tests.pc.in 
+	packages.config \
+	kopilua.tests.40.pc.in 
 
 REFERENCES =  \
 	System \
@@ -81,12 +82,12 @@ include $(top_srcdir)/Makefile.include
 
 NUNIT_FRAMEWORK_DLL = $(BUILD_DIR)/nunit.framework.dll
 KOPILUA_DLL = $(BUILD_DIR)/KopiLua.dll
-KOPILUA_TESTS_PC = $(BUILD_DIR)/kopilua.tests.pc
+KOPILUA_TESTS_40_PC = $(BUILD_DIR)/kopilua.tests.40.pc
 
 $(eval $(call emit-deploy-target,NUNIT_FRAMEWORK_DLL))
 $(eval $(call emit-deploy-target,KOPILUA_DLL))
 $(eval $(call emit-deploy-target,KOPILUA_DLL_MDB))
-$(eval $(call emit-deploy-wrapper,KOPILUA_TESTS_PC,kopilua.tests.pc))
+$(eval $(call emit-deploy-wrapper,KOPILUA_TESTS_40_PC,kopilua.tests.40.pc))
 
 
 $(eval $(call emit_resgen_targets))

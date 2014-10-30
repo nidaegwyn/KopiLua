@@ -4,40 +4,52 @@ EXTRA_DIST =
 # Warning: This is an automatically generated file, do not edit!
 
 if ENABLE_DEBUG
-ASSEMBLY_COMPILER_COMMAND = gmcs
+ASSEMBLY_COMPILER_COMMAND = dmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:TRACE;DEBUG;LUA_CORE;CATCH_EXCEPTIONS"
-ASSEMBLY = ../Bin/Debug/Lua.exe
+ASSEMBLY = ../Bin/Debug/net40/Lua.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
-PROJECT_REFERENCES = 
-BUILD_DIR = ../Bin/Debug/
+PROJECT_REFERENCES =  \
+	../Bin/Debug/net40/KopiLua.dll
+BUILD_DIR = ../Bin/Debug/net40/
 
-LUA_EXE_MDB_SOURCE=../Bin/Debug/Lua.exe.mdb
+LUA_EXE_MDB_SOURCE=../Bin/Debug/net40/Lua.exe.mdb
 LUA_EXE_MDB=$(BUILD_DIR)/Lua.exe.mdb
+LUA_EXE_CONFIG_SOURCE=app.config
+KOPILUA_DLL_SOURCE=../Bin/Debug/net40/KopiLua.dll
+KOPILUA_DLL_MDB_SOURCE=../Bin/Debug/net40/KopiLua.dll.mdb
+KOPILUA_DLL_MDB=$(BUILD_DIR)/KopiLua.dll.mdb
 
 endif
 
 if ENABLE_RELEASE
-ASSEMBLY_COMPILER_COMMAND = gmcs
+ASSEMBLY_COMPILER_COMMAND = dmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ "-define:TRACE;LUA_CORE;CATCH_EXCEPTIONS"
-ASSEMBLY = ../Bin/Release/Lua.exe
+ASSEMBLY = ../Bin/Release/net40/Lua.exe
 ASSEMBLY_MDB = 
 COMPILE_TARGET = exe
-PROJECT_REFERENCES = 
-BUILD_DIR = ../Bin/Release/
+PROJECT_REFERENCES =  \
+	../Bin/Release/net40/KopiLua.dll
+BUILD_DIR = ../Bin/Release/net40/
 
 LUA_EXE_MDB=
+LUA_EXE_CONFIG_SOURCE=app.config
+KOPILUA_DLL_SOURCE=../Bin/Release/net40/KopiLua.dll
+KOPILUA_DLL_MDB=
 
 endif
 
-AL=al2
+AL=al
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
-	$(LUA_EXE_MDB)  
+	$(LUA_EXE_MDB) \
+	$(LUA_EXE_CONFIG) \
+	$(KOPILUA_DLL) \
+	$(KOPILUA_DLL_MDB)  
 
 BINARIES = \
-	$(LUA)  
+	$(LUA_40)  
 
 
 RESGEN=resgen2
@@ -46,54 +58,15 @@ all: $(ASSEMBLY) $(PROGRAMFILES) $(BINARIES)
 
 FILES = \
 	lua.cs \
-	Properties/AssemblyInfo.cs \
-	../KopiLua/src/lapi.cs \
-	../KopiLua/src/lauxlib.cs \
-	../KopiLua/src/lbaselib.cs \
-	../KopiLua/src/lcode.cs \
-	../KopiLua/src/ldblib.cs \
-	../KopiLua/src/ldebug.cs \
-	../KopiLua/src/ldo.cs \
-	../KopiLua/src/ldump.cs \
-	../KopiLua/src/lfunc.cs \
-	../KopiLua/src/lgc.cs \
-	../KopiLua/src/linit.cs \
-	../KopiLua/src/liolib.cs \
-	../KopiLua/src/llex.cs \
-	../KopiLua/src/llimits.cs \
-	../KopiLua/src/lmathlib.cs \
-	../KopiLua/src/lmem.cs \
-	../KopiLua/src/loadlib.cs \
-	../KopiLua/src/lobject.cs \
-	../KopiLua/src/lopcodes.cs \
-	../KopiLua/src/loslib.cs \
-	../KopiLua/src/lparser.cs \
-	../KopiLua/src/lstate.cs \
-	../KopiLua/src/lstring.cs \
-	../KopiLua/src/lstrlib.cs \
-	../KopiLua/src/ltable.cs \
-	../KopiLua/src/ltablib.cs \
-	../KopiLua/src/ltm.cs \
-	../KopiLua/src/lua.cs \
-	../KopiLua/src/luaconf.cs \
-	../KopiLua/src/lualib.cs \
-	../KopiLua/src/lundump.cs \
-	../KopiLua/src/lvm.cs \
-	../KopiLua/src/lzio.cs \
-	../KopiLua/src/print.cs \
-	../KopiLua/src/printf/Tools.cs \
-	../KopiLua/src/lnet.cs \
-	../KopiLua/src/CharPtr.cs \
-	../KopiLua/src/LuaState.cs \
-	../KopiLua/src/LuaDebug.cs \
-	../KopiLua/src/LuaTag.cs 
+	Properties/AssemblyInfo.cs 
 
 DATA_FILES = 
 
 RESOURCES = 
 
 EXTRAS = \
-	lua.in 
+	app.config \
+	lua.40.in 
 
 REFERENCES =  \
 	Accessibility \
@@ -107,9 +80,12 @@ CLEANFILES = $(PROGRAMFILES) $(BINARIES)
 
 include $(top_srcdir)/Makefile.include
 
-LUA = $(BUILD_DIR)/lua
+LUA_EXE_CONFIG = $(BUILD_DIR)/Lua.exe.config
+KOPILUA_DLL = $(BUILD_DIR)/KopiLua.dll
+LUA_40 = $(BUILD_DIR)/lua.40
 
-$(eval $(call emit-deploy-wrapper,LUA,lua,x))
+$(eval $(call emit-deploy-target,LUA_EXE_CONFIG))
+$(eval $(call emit-deploy-wrapper,LUA_40,lua.40,x))
 
 
 $(eval $(call emit_resgen_targets))

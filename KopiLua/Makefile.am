@@ -4,40 +4,40 @@ EXTRA_DIST =
 # Warning: This is an automatically generated file, do not edit!
 
 if ENABLE_DEBUG
-ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:TRACE;DEBUG;LUA_CORE;CATCH_EXCEPTIONS"
-ASSEMBLY = ../Bin/Debug/KopiLua.dll
+ASSEMBLY_COMPILER_COMMAND = dmcs
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:TRACE;DEBUG;LUA_CORE;CATCH_EXCEPTIONS" "-keyfile:key.snk"
+ASSEMBLY = ../Bin/Debug/net40/KopiLua.dll
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = library
 PROJECT_REFERENCES = 
-BUILD_DIR = ../Bin/Debug/
+BUILD_DIR = ../Bin/Debug/net40/
 
-KOPILUA_DLL_MDB_SOURCE=../Bin/Debug/KopiLua.dll.mdb
+KOPILUA_DLL_MDB_SOURCE=../Bin/Debug/net40/KopiLua.dll.mdb
 KOPILUA_DLL_MDB=$(BUILD_DIR)/KopiLua.dll.mdb
 
 endif
 
 if ENABLE_RELEASE
-ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ "-define:TRACE;LUA_CORE;CATCH_EXCEPTIONS"
-ASSEMBLY = ../Bin/Release/KopiLua.dll
+ASSEMBLY_COMPILER_COMMAND = dmcs
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ "-define:TRACE;LUA_CORE;CATCH_EXCEPTIONS" "-keyfile:key.snk"
+ASSEMBLY = ../Bin/Release/net40/KopiLua.dll
 ASSEMBLY_MDB = 
 COMPILE_TARGET = library
 PROJECT_REFERENCES = 
-BUILD_DIR = ../Bin/Release/
+BUILD_DIR = ../Bin/Release/net40/
 
 KOPILUA_DLL_MDB=
 
 endif
 
-AL=al2
+AL=al
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
 	$(KOPILUA_DLL_MDB)  
 
 LINUX_PKGCONFIG = \
-	$(KOPILUA_PC)  
+	$(KOPILUA_NET40_PC)  
 
 
 RESGEN=resgen2
@@ -45,6 +45,7 @@ RESGEN=resgen2
 all: $(ASSEMBLY) $(PROGRAMFILES) $(LINUX_PKGCONFIG) 
 
 FILES = \
+	../Lua/lua.cs \
 	Properties/AssemblyInfo_KopiLua.cs \
 	src/lapi.cs \
 	src/lauxlib.cs \
@@ -85,14 +86,16 @@ FILES = \
 	src/CharPtr.cs \
 	src/LuaState.cs \
 	src/LuaDebug.cs \
-	src/LuaTag.cs 
+	src/LuaTag.cs \
+	src/Platform/CLSCompliantAttribute.cs 
 
 DATA_FILES = 
 
 RESOURCES = 
 
 EXTRAS = \
-	kopilua.pc.in 
+	key.snk \
+	kopilua.net40.pc.in 
 
 REFERENCES =  \
 	System \
@@ -106,9 +109,9 @@ CLEANFILES = $(PROGRAMFILES) $(LINUX_PKGCONFIG)
 
 include $(top_srcdir)/Makefile.include
 
-KOPILUA_PC = $(BUILD_DIR)/kopilua.pc
+KOPILUA_NET40_PC = $(BUILD_DIR)/kopilua.net40.pc
 
-$(eval $(call emit-deploy-wrapper,KOPILUA_PC,kopilua.pc))
+$(eval $(call emit-deploy-wrapper,KOPILUA_NET40_PC,kopilua.net40.pc))
 
 
 $(eval $(call emit_resgen_targets))
