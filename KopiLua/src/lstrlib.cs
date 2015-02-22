@@ -454,8 +454,7 @@ namespace KopiLua
 				  }
 				  break;
 				}
-			  default:
-			  dflt: {  /* pattern class plus optional suffix */
+			  default: dflt: {  /* pattern class plus optional suffix */
 				  CharPtr ep = classend(ms, p);  /* points to optional suffix */
 				  /* does not match at least once? */
 				  if ((s >= ms.src_end) || (singlematch((byte)(s[0]), p, ep) == 0)) {
