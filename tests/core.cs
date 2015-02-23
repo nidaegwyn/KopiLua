@@ -128,5 +128,31 @@ namespace Tests.iOS
 		{
 			TestLuaFile ("trace-globals");
 		}
+		
+		[Test]
+        public void StringLib()
+        {
+            // Tests for string.gsub working with more than MAXCALLS characters.
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append('a', Lua.MAXCCALLS);
+            string before = sb.ToString() + " RR " + "TRAIL";
+            string after = sb.ToString() + " 123456789 " + "TRAIL";
+
+            string str = "assert(string.gsub(\"" + before + "\", \"RR\", \"123456789\") == \"" + after +"\")";
+            
+            if (Lua.LuaLLoadString(state, str) != 0)
+            {
+                var error = Lua.LuaToString(state, -1);
+                Lua.LuaPop(state, 1);
+
+                Assert.Fail("LoadString failed.");
+            }
+
+            if (Lua.LuaPCall(state, 0, 0, 0) != 0)
+            {
+                Assert.Fail("Function call failed: " + Lua.LuaToString(state, -1).ToString());
+            }
+        }
 	}
 }
