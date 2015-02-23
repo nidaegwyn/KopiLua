@@ -390,76 +390,95 @@ namespace KopiLua
 		private static CharPtr match(MatchState ms, CharPtr s, CharPtr p) {
 		  s = new CharPtr(s);
 		  p = new CharPtr(p);
+		  bool runDflt = false;
+		  bool runInit = true;
 		  if (ms.matchdepth-- == 0)
 			LuaLError(ms.L, "pattern too complex");
-		  init: /* using goto's to optimize tail recursion */
-		  if (p != '\0') { /* end of pattern? */
-			switch (p[0]) {
-			  case '(': {  /* start capture */
-				  if (p[1] == ')') {  /* position capture? */
-					s = start_capture(ms, s, p + 2, CAP_POSITION);
-				  }
-				  else {
-					s = start_capture(ms, s, p + 1, CAP_UNFINISHED);
-				  }
-				  break;
-				}
-			  case ')': {  /* end capture */
-				  s = end_capture(ms, s, p + 1);
-				  break;
-				}
-			  case '$': {
-				  if (p[1] != '\0') {  /* is the `$' the last char in pattern? */
-					goto dflt; /* no; go to default */
-				  }
-				  s = (s == ms.src_end) ? s : null;  /* check end of string */
-				  break;
-				}
-			  case L_ESC: { /* escaped sequences not in the format class[*+?-]? */
-				  switch (p[1]) {
-					case 'b': {  /* balanced string? */
-						s = matchbalance(ms, s, p + 2);
-						if (s != null) {
-						  p += 4; goto init;  /* return match(ms, s, p+4); */
-						}
-						/* else fail (s == NULL) */
-						break;
+		  //init:
+		  while (runInit) { // Replaces "init:" in order to be compatible with Mono.
+			  runInit = false; // No "goto init" until further notice.
+			  if (p != '\0') { /* end of pattern? */
+				switch (p[0]) {
+				  case '(': {  /* start capture */
+					  if (p[1] == ')') {  /* position capture? */
+						s = start_capture(ms, s, p + 2, CAP_POSITION);
 					  }
-					case 'f': {  /* frontier? */
-						CharPtr ep; char previous;
-						p += 2;
-						if (p[0] != '[') {
-						  LuaLError(ms.L, "missing " + LUA_QL("[") + " after " +
-									  LUA_QL("%%f") + " in pattern");
-						}
-						ep = classend(ms, p);  /* points to what is next */
-						previous = (s == ms.src_init) ? '\0' : s[-1];
-						if ((matchbracketclass((byte)(previous), p, ep - 1) == 0) ||
-						  (matchbracketclass((byte)(s[0]), p, ep - 1) != 0)) {
-						  p = ep; goto init; /* else return match(ms, s, ep); */
-						}
-						s = null;  /* match failed */
-						break;
+					  else {
+						s = start_capture(ms, s, p + 1, CAP_UNFINISHED);
 					  }
-					default: {
-						if (isdigit((byte)(p[1]))) {  /* capture results (%0-%9)? */
-						  s = match_capture(ms, s, (byte)(p[1]));
-						  if (s != null) {
-							p += 2; goto init;  /* else return match(ms, s, p+2) */
+					  break;
+					}
+				  case ')': {  /* end capture */
+					  s = end_capture(ms, s, p + 1);
+					  break;
+					}
+				  case '$': {
+					  if (p[1] != '\0') {  /* is the `$' the last char in pattern? */
+						runDflt = true; //goto dflt; /* no; go to default */
+					  }
+					  s = (s == ms.src_end) ? s : null;  /* check end of string */
+					  break;
+					}
+				  case L_ESC: { /* escaped sequences not in the format class[*+?-]? */
+					  switch (p[1]) {
+						case 'b': {  /* balanced string? */
+							s = matchbalance(ms, s, p + 2);
+							if (s != null) {
+							  p += 4;
+							  runInit = true; //goto init;  /* return match(ms, s, p+4); */
+							}
+							/* else fail (s == NULL) */
+							break;
 						  }
-						  break;
-						}
-						goto dflt;
+						case 'f': {  /* frontier? */
+							CharPtr ep; char previous;
+							p += 2;
+							if (p[0] != '[') {
+							  LuaLError(ms.L, "missing " + LUA_QL("[") + " after " +
+										  LUA_QL("%%f") + " in pattern");
+							}
+							ep = classend(ms, p);  /* points to what is next */
+							previous = (s == ms.src_init) ? '\0' : s[-1];
+							if ((matchbracketclass((byte)(previous), p, ep - 1) == 0) ||
+							  (matchbracketclass((byte)(s[0]), p, ep - 1) != 0)) {
+							  p = ep; 
+							  runInit = true; //goto init; /* else return match(ms, s, ep); */
+							}
+							s = null;  /* match failed */
+							break;
+						  }
+						default: {
+							if (isdigit((byte)(p[1]))) {  /* capture results (%0-%9)? */
+							  s = match_capture(ms, s, (byte)(p[1]));
+							  if (s != null) {
+								p += 2; 
+								runInit = true; //goto init;  /* else return match(ms, s, p+2) */
+							  }
+							  break;
+							}
+							runDflt = true; //goto dflt;
+							break;
+						  }
 					  }
-				  }
-				  break;
+					  break;
+					}
+				  default: {
+					  runDflt = true; // goto dflt
+					  break;
+					}
 				}
-			  default: dflt: {  /* pattern class plus optional suffix */
+			  }
+
+			  //dflt:
+			  if (runDflt) // Replaces "dflt:" in order to be compatible with Mono.
+			  {  /* pattern class plus optional suffix */
+				  runDflt = false; // no more "goto dflt" until further notice.
 				  CharPtr ep = classend(ms, p);  /* points to optional suffix */
 				  /* does not match at least once? */
 				  if ((s >= ms.src_end) || (singlematch((byte)(s[0]), p, ep) == 0)) {
 					if (ep == '*' || ep == '?' || ep == '-') { /* accept empty? */
-					  p = ep + 1; goto init; /* return match(ms, s, ep + 1); */
+					  p = ep + 1; 
+					  runInit = true; //goto init; /* return match(ms, s, ep + 1); */
 					}
 					else  /* '+' or no suffix */
 					  s = null; /* fail */
@@ -472,7 +491,8 @@ namespace KopiLua
 							s = res;
 						  }
 						  else {
-							p = ep + 1; goto init;  /* else return match(ms, s, ep+1); */
+							p = ep + 1; 
+							runInit = true; //goto init;  /* else return match(ms, s, ep+1); */
 						  }
 						  break;
 						}
@@ -490,14 +510,16 @@ namespace KopiLua
 						  break;
 						}
 					  default: { /* no suffix */
-						  s = s.next(); p = ep; goto init;  /* return match(ms, s+1, ep); */
+						  s = s.next(); 
+						  p = ep; 
+						  runInit = true; //goto init;  /* return match(ms, s+1, ep); */
+						  break;
 						}
 					}
 				  }
-				  break;
-				}
-			}
+			  }
 		  }
+		  
 		  ms.matchdepth++;
 		  return s;
 		}
