@@ -165,5 +165,25 @@ namespace Tests.iOS
 
             AssertString(str);
         }
+
+        [Test]
+        public void OSLib()
+        {
+            string sd1 = "local d1 = os.date(\"*t\", 63568252248)\nprint('d1.yday=' .. d1.yday)";
+            string st1 = "local t1 = os.time({year=2015, month=5, day=28, hour=15, min=50, sec=48})\nprint('t1=' .. tostring(t1))";
+            string st2 = "local t2 = os.time({year=2015, month=5, day=28, hour=15, min=51, sec=18})\nprint(t2)";
+
+            // Test for os.date giving proper values for a specified time.
+            AssertString(sd1 + "\nassert(d1.yday == 146 and d1.year == 2015)");
+
+            // Test for os.time giving proper values for a full time.
+            AssertString(st1 + "\nassert(t1 == 63568425048)");
+
+            // Test for os.time difference giving result in seconds.
+            AssertString(st1 + "\n" + st2 + "\nassert(t2 - t1 == 30)");
+
+            // Test for os.difftime giving result in seconds.
+            AssertString(st1 + "\n" + st2 + "\nassert(os.difftime(t2, t1) == 30)");
+        }
 	}
 }
