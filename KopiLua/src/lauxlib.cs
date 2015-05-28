@@ -78,7 +78,8 @@ namespace KopiLua
 
 		public delegate LuaNumberType LuaLOptDelegate (LuaState L, int narg);		
 		public static LuaNumberType LuaLOpt(LuaState L, LuaLOptDelegate f, int n, LuaNumberType d) {
-			return LuaIsNoneOrNil(L, (n != 0) ? d : f(L, n)) ? 1 : 0;}
+			return LuaIsNoneOrNil(L, n) ? d : f(L, (n));
+		}
 
 		public delegate LuaIntegerType LuaLOptDelegateInteger(LuaState L, int narg);
 		public static LuaIntegerType LuaLOptInteger(LuaState L, LuaLOptDelegateInteger f, int n, LuaNumberType d) {
