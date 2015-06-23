@@ -9,9 +9,9 @@ using System.Resources;
 [assembly: AssemblyTitle("KopiLua_wp7")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MICROSOFT")]
+[assembly: AssemblyCompany("Microsoft")]
 [assembly: AssemblyProduct("KopiLua_wp7")]
-[assembly: AssemblyCopyright("Copyright © 2012 Gerasimov Sergey")]
+[assembly: AssemblyCopyright("Copyright © 2014 Gerasimov Sergey")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,6 +32,6 @@ using System.Resources;
 //
 // Можно указать все значения или задать для номеров редакции и построения значения по умолчанию 
 // с помощью символа '*', как показано ниже:
-[assembly: AssemblyVersion("1.3.0.0")]
-[assembly: AssemblyFileVersion("1.3.0.0")]
+[assembly: AssemblyVersion("1.3.2.0")]
+[assembly: AssemblyFileVersion("1.3.2.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]

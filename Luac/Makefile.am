@@ -4,40 +4,43 @@ EXTRA_DIST =
 # Warning: This is an automatically generated file, do not edit!
 
 if ENABLE_DEBUG
-ASSEMBLY_COMPILER_COMMAND = gmcs
+ASSEMBLY_COMPILER_COMMAND = dmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:TRACE;DEBUG;LUA_CORE;CATCH_EXCEPTIONS"
-ASSEMBLY = ../Bin/Debug/Luac.exe
+ASSEMBLY = ../Bin/Debug/net40/Luac.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
-BUILD_DIR = ../Bin/Debug/
+BUILD_DIR = ../Bin/Debug/net40/
 
-LUAC_EXE_MDB_SOURCE=../Bin/Debug/Luac.exe.mdb
+LUAC_EXE_MDB_SOURCE=../Bin/Debug/net40/Luac.exe.mdb
 LUAC_EXE_MDB=$(BUILD_DIR)/Luac.exe.mdb
+LUAC_EXE_CONFIG_SOURCE=app.config
 
 endif
 
 if ENABLE_RELEASE
-ASSEMBLY_COMPILER_COMMAND = gmcs
+ASSEMBLY_COMPILER_COMMAND = dmcs
 ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ "-define:TRACE;LUA_CORE;CATCH_EXCEPTIONS"
-ASSEMBLY = ../Bin/Release/Luac.exe
+ASSEMBLY = ../Bin/Release/net40/Luac.exe
 ASSEMBLY_MDB = 
 COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
-BUILD_DIR = ../Bin/Release/
+BUILD_DIR = ../Bin/Release/net40/
 
 LUAC_EXE_MDB=
+LUAC_EXE_CONFIG_SOURCE=app.config
 
 endif
 
-AL=al2
+AL=al
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
-	$(LUAC_EXE_MDB)  
+	$(LUAC_EXE_MDB) \
+	$(LUAC_EXE_CONFIG)  
 
 BINARIES = \
-	$(LUAC)  
+	$(LUAC_40)  
 
 
 RESGEN=resgen2
@@ -82,10 +85,9 @@ FILES = \
 	../KopiLua/src/lzio.cs \
 	../KopiLua/src/print.cs \
 	../KopiLua/src/printf/Tools.cs \
-	../KopiLua/src/lnet.cs \
 	../KopiLua/src/CharPtr.cs \
-	../KopiLua/src/LuaState.cs \
 	../KopiLua/src/LuaDebug.cs \
+	../KopiLua/src/LuaState.cs \
 	../KopiLua/src/LuaTag.cs 
 
 DATA_FILES = 
@@ -93,7 +95,8 @@ DATA_FILES =
 RESOURCES = 
 
 EXTRAS = \
-	luac.in 
+	app.config \
+	luac.40.in 
 
 REFERENCES =  \
 	System \
@@ -106,9 +109,11 @@ CLEANFILES = $(PROGRAMFILES) $(BINARIES)
 
 include $(top_srcdir)/Makefile.include
 
-LUAC = $(BUILD_DIR)/luac
+LUAC_EXE_CONFIG = $(BUILD_DIR)/Luac.exe.config
+LUAC_40 = $(BUILD_DIR)/luac.40
 
-$(eval $(call emit-deploy-wrapper,LUAC,luac,x))
+$(eval $(call emit-deploy-target,LUAC_EXE_CONFIG))
+$(eval $(call emit-deploy-wrapper,LUAC_40,luac.40,x))
 
 
 $(eval $(call emit_resgen_targets))

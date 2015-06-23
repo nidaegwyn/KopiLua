@@ -151,12 +151,22 @@ namespace KopiLua
 		private static int OSDate (LuaState L) {
 		  CharPtr s = LuaLOptString(L, 1, "%c");
 		  DateTime stm;
+
+            // Parses the second argument if there's one. If not, uses Now as time.
+            if (LuaIsNoneOrNil(L, 2)) {
+              stm = DateTime.Now; 
+            }
+            else
+            {
+              LuaLCheckType(L, 2, LUA_TNUMBER);
+              double seconds = LuaToNumber(L, 2);
+              stm = new DateTime((long)seconds * TimeSpan.TicksPerSecond);
+            }
+
 		  if (s[0] == '!') {  /* UTC? */
-			stm = DateTime.UtcNow;
+			stm = stm.ToUniversalTime();
 			s.inc();  /* skip `!' */
 		  }
-		  else
-			  stm = DateTime.Now;
 		  if (strcmp(s, "*t") == 0) {
 			LuaCreateTable(L, 0, 9);  /* 9 = number of fields */
 			SetField(L, "sec", stm.Second);
@@ -165,7 +175,7 @@ namespace KopiLua
 			SetField(L, "day", stm.Day);
 			SetField(L, "month", stm.Month);
 			SetField(L, "year", stm.Year);
-			SetField(L, "wday", (int)stm.DayOfWeek);
+			SetField(L, "wday", (int)stm.DayOfWeek + 1);
 			SetField(L, "yday", stm.DayOfYear);
 			SetBoolField(L, "isdst", stm.IsDaylightSavingTime() ? 1 : 0);
 		  }
@@ -464,7 +474,10 @@ namespace KopiLua
 		private static int OSTime (LuaState L) {
 		  DateTime t;
 		  if (LuaIsNoneOrNil(L, 1))  /* called without args? */
+		  {
 			t = DateTime.Now;  /* get current time */
+			t = new DateTime(t.Year, t.Month, t.Day, t.Hour, t.Minute, t.Second);
+		  }
 		  else {
 			LuaLCheckType(L, 1, LUA_TTABLE);
 			LuaSetTop(L, 1);  /* make sure table is at the top */
@@ -472,19 +485,19 @@ namespace KopiLua
 			int min = GetField(L, "min", 0);
 			int hour = GetField(L, "hour", 12);
 			int day = GetField(L, "day", -1);
-			int month = GetField(L, "month", -1) - 1;
-			int year = GetField(L, "year", -1) - 1900;
+			int month = GetField(L, "month", -1);
+			int year = GetField(L, "year", -1);
 			/*int isdst = */GetBoolField(L, "isdst");	// todo: implement this - mjf
 			t = new DateTime(year, month, day, hour, min, sec);
 		  }
-		  LuaPushNumber(L, t.Ticks);
+		  LuaPushNumber(L, t.Ticks / TimeSpan.TicksPerSecond);
 		  return 1;
 		}
 
 
 		private static int OSDiffTime (LuaState L) {
-		  long ticks = (long)LuaLCheckNumber(L, 1) - (long)LuaLOptNumber(L, 2, 0);
-		  LuaPushNumber(L, ticks/TimeSpan.TicksPerSecond);
+		  long seconds = (long)LuaLCheckNumber(L, 1) - (long)LuaLOptNumber(L, 2, 0);
+          LuaPushNumber(L, seconds);
 		  return 1;
 		}
 

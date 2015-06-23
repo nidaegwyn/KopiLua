@@ -7,7 +7,7 @@ language: c
 
 # We need CMake, Mono and NUnit
 install:
-  - sudo apt-get install cmake mono-devel mono-gmcs nunit >/dev/null 2>&1
+  - ./CI/install.travis.deps.sh
 
 script:
   - git submodule update --init

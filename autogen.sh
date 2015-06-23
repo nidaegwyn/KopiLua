@@ -1,6 +1,6 @@
 #! /bin/sh
 
-PROJECT=KopiLua
+PROJECT=KopiLua.Net40
 FILE=
 CONFIGURE=configure.ac
 

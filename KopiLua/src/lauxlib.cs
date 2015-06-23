@@ -78,7 +78,8 @@ namespace KopiLua
 
 		public delegate LuaNumberType LuaLOptDelegate (LuaState L, int narg);		
 		public static LuaNumberType LuaLOpt(LuaState L, LuaLOptDelegate f, int n, LuaNumberType d) {
-			return LuaIsNoneOrNil(L, (n != 0) ? d : f(L, n)) ? 1 : 0;}
+			return LuaIsNoneOrNil(L, n) ? d : f(L, (n));
+		}
 
 		public delegate LuaIntegerType LuaLOptDelegateInteger(LuaState L, int narg);
 		public static LuaIntegerType LuaLOptInteger(LuaState L, LuaLOptDelegateInteger f, int n, LuaNumberType d) {
@@ -157,9 +158,9 @@ namespace KopiLua
 
 		public static int LuaLArgError (LuaState L, int narg, CharPtr extramsg) {
 		  LuaDebug ar = new LuaDebug();
-		  if (LuaGetStack(L, 0, ar)==0)  /* no stack frame? */
+		  if (LuaGetStack(L, 0, ref ar)==0)  /* no stack frame? */
 			  return LuaLError(L, "bad argument #%d (%s)", narg, extramsg);
-		  LuaGetInfo(L, "n", ar);
+		  LuaGetInfo(L, "n", ref ar);
 		  if (strcmp(ar.namewhat, "method") == 0) {
 			narg--;  /* do not count `self' */
 			if (narg == 0)  /* error is in the self argument itself? */
@@ -187,8 +188,8 @@ namespace KopiLua
 
 		public static void LuaLWhere (LuaState L, int level) {
 		  LuaDebug ar = new LuaDebug();
-		  if (LuaGetStack(L, level, ar) != 0) {  /* check function at level */
-			LuaGetInfo(L, "Sl", ar);  /* get info about it */
+		  if (LuaGetStack(L, level, ref ar) != 0) {  /* check function at level */
+			LuaGetInfo(L, "Sl", ref ar);  /* get info about it */
 			if (ar.currentline > 0) {  /* is there info? */
 			  LuaPushFString(L, "%s:%d: ", ar.short_src, ar.currentline);
 			  return;

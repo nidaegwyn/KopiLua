@@ -529,8 +529,8 @@ namespace KopiLua
 
 		private static void SetFEnv (LuaState L) {
 		  LuaDebug ar = new LuaDebug();
-		  if (LuaGetStack(L, 1, ar) == 0 ||
-			  LuaGetInfo(L, "f", ar) == 0 ||  /* get calling function */
+		  if (LuaGetStack(L, 1, ref ar) == 0 ||
+			  LuaGetInfo(L, "f", ref ar) == 0 ||  /* get calling function */
 			  LuaIsCFunction(L, -1))
 			LuaLError(L, LUA_QL("module") + " not called from a Lua function");
 		  LuaPushValue(L, -2);
