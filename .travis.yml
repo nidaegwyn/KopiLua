@@ -2,15 +2,15 @@
 # lua Travis-CI Hook
 #
 
-# Travis language: c(sharp) :-P
-language: c
+language: csharp
 
+before_install:
+  - git submodule update --init --recursive
 # We need CMake, Mono and NUnit
 install:
-  - ./CI/install.travis.deps.sh
+  - sudo apt-get install nunit
 
 script:
-  - git submodule update --init
   - ./run_all.linux.sh
 
 # Execute additional tests or commands
