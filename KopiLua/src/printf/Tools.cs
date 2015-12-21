@@ -678,7 +678,7 @@ namespace AT.MIN
 				{
 					if ( w.StartsWith( "-" ) )
 						w = w.Substring( 1 );
-					if ( FieldLength != int.MinValue )
+					if ( FieldLength > 0 )
 						w = w.PadLeft( FieldLength - 1, Padding );
 					if ( IsPositive( Value, true ) )
 						w = ( PositiveSign ?
