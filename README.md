@@ -1,7 +1,7 @@
 KopiLua
 =================
 
-[![Build Status](https://travis-ci.org/NLua/KopiLua.svg?branch=master)](https://travis-ci.org/NLua/KopiLua)
+[![Build Status](https://travis-ci.org/nidaegwyn/KopiLua.svg?branch=master)](https://travis-ci.org/nidaegwyn/KopiLua)
 
 * What is KopiLua?
  ------------
@@ -35,6 +35,9 @@ KopiLua
   
 * Contact/Bug Reports etc
  -------------------------
+ Report any bugs from my changes to Ryan Thomann/nidaegwyn (mailto:ryan.thomann@gmail.com)
+ Forked from NLua/KopiLua. 
+ See below for original Contact/Bug Reports info.
  Please report all bugs and issues to Vinicius Jarina/viniciusjarina (mailto:viniciusjarina@gmail.com)
  (Old: Please report all bugs and issues to Mark Feldman (mailto:lua@ppl-pilot.com))
 
