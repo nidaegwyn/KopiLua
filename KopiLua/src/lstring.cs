@@ -111,6 +111,22 @@ namespace KopiLua
 		  return res;
 		}
 
+		public static Udata luaS_newudata(LuaState L, object o, Table e)
+		{
+			Udata u = new Udata();
+			u.uv.marked = LuaCWhite(G(L)); /* is not finalized */
+			u.uv.tt = LUA_TUSERDATA;
+			u.uv.len = 0;
+			u.uv.metatable = null;
+			u.uv.env = e;
+			u.user_data = o;
+			AddTotalBytes(L, GetUnmanagedSize(typeof(Udata)) + sizeudata(u));
+			/* chain it on udata list (after main thread) */
+			u.uv.next = G(L).mainthread.next;
+			G(L).mainthread.next = obj2gco(u);
+			return u;
+		}
+
 		[CLSCompliantAttribute(false)]
 		public static Udata luaS_newudata(LuaState L, uint s, Table e)
 		{
@@ -121,7 +137,7 @@ namespace KopiLua
 			u.uv.metatable = null;
 			u.uv.env = e;
 			u.user_data = new byte[s];
-            AddTotalBytes(L, GetUnmanagedSize(typeof(Udata)) + sizeudata(u));
+			AddTotalBytes(L, GetUnmanagedSize(typeof(Udata)) + sizeudata(u));
 			/* chain it on udata list (after main thread) */
 			u.uv.next = G(L).mainthread.next;
 			G(L).mainthread.next = obj2gco(u);

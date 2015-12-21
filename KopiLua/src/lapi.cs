@@ -1028,6 +1028,18 @@ namespace KopiLua
 		  LuaUnlock(L);
 		}
 
+		public static object LuaPushUserData(LuaState L, object o)
+		{
+			Udata u;
+			LuaLock(L);
+			LuaCCheckGC(L);
+			u = luaS_newudata(L, o, GetCurrentEnv(L));
+			SetUValue(L, L.top, u);
+			IncrementTop(L);
+			LuaUnlock(L);
+			return u.user_data;
+		}
+
 		[CLSCompliantAttribute(false)]
 		public static object LuaNewUserData(LuaState L, uint size)
 		{
