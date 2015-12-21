@@ -1243,34 +1243,34 @@ namespace KopiLua
 
 		public static CharPtr fgets(CharPtr str, Stream stream)
 		{
-            using (StreamReader reader = new StreamReader(stream, Encoding.Default, false, 256, true))
-            {
-                try
-                {
-                    for (int i = 0; i < str.chars.Length - 1; i++)
-                    {
-                        str[i] = (char)reader.Read();
-                        
-                        // eat \r in \r\n
-                        if (str[i] == '\r' && reader.Peek() == '\n')
-                        {
-                            str[i] = (char)reader.Read();
-                        }
+			using (StreamReader reader = new StreamReader(stream, Encoding.Default, false, 256, true))
+			{
+				try
+				{
+					for (int i = 0; i < str.chars.Length - 1; i++)
+					{
+						str[i] = (char)reader.Read();
+						
+						// eat \r in \r\n
+						if (str[i] == '\r' && reader.Peek() == '\n')
+						{
+							str[i] = (char)reader.Read();
+						}
 
-                        if (str[i] == '\n')
-                        {
-                            str[i + 1] = '\0';
-                            return str;
-                        }
-                    }
-                    str[str.chars.Length - 1] = '\0';
-                }
-                catch
-                {
-                }
+						if (str[i] == '\n')
+						{
+							str[i + 1] = '\0';
+							return str;
+						}
+					}
+					str[str.chars.Length - 1] = '\0';
+				}
+				catch
+				{
+				}
 
-                return str;
-            }
+				return str;
+			}
 		}
 
 		public static double frexp(double x, out int expptr)

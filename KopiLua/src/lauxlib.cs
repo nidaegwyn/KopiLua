@@ -68,11 +68,11 @@ namespace KopiLua
 
 		public static CharPtr LuaLTypeName(LuaState L, int i)	{return LuaTypeName(L, LuaType(L,i));}
 
-        public static int LuaLDoFile(LuaState L, CharPtr fn) { int ret = LuaLLoadFile(L, fn); if (ret == 0) ret = LuaPCall(L, 0, Lua.LUA_MULTRET, 0); return ret; }
+		public static int LuaLDoFile(LuaState L, CharPtr fn) { int ret = LuaLLoadFile(L, fn); if (ret == 0) ret = LuaPCall(L, 0, Lua.LUA_MULTRET, 0); return ret; }
 		//#define luaL_dofile(L, fn) \
 		//    (luaL_loadfile(L, fn) || lua_pcall(L, 0, LUA_MULTRET, 0))
 
-        public static int LuaLDoString(LuaState L, CharPtr s) { int ret = LuaLLoadString(L, s); if (ret == 0) ret = LuaPCall(L, 0, Lua.LUA_MULTRET, 0); return ret; }
+		public static int LuaLDoString(LuaState L, CharPtr s) { int ret = LuaLLoadString(L, s); if (ret == 0) ret = LuaPCall(L, 0, Lua.LUA_MULTRET, 0); return ret; }
 		//#define luaL_dostring(L, s) \
 		//    (luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, 0))
 
